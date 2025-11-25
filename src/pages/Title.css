@@ -1,0 +1,247 @@
+/* タイトル画面全体のコンテナ */
+.title-container {
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom, #f5e6e8, #faf3f3);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 装飾要素の基本スタイル */
+.decoration {
+  position: absolute;
+  pointer-events: none; /* クリックイベントを無視 */
+}
+
+/* 左上の装飾エリア */
+.decoration-top-left {
+  top: -50px;
+  left: -50px;
+  width: 400px;
+  height: 400px;
+}
+
+/* 右下の装飾エリア */
+.decoration-bottom-right {
+  bottom: -50px;
+  right: -50px;
+  width: 450px;
+  height: 450px;
+}
+
+/* ぐにゃぐにゃ動く丸の基本スタイル */
+.blob {
+  position: absolute;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+/* 左上の丸1：濃い赤 */
+.blob-1 {
+  width: 250px;
+  height: 250px;
+  background-color: #a52a44;
+  top: 0;
+  left: 0;
+  animation: 
+    blob-morph-1 8s infinite,
+    blob-rotate-1 12s infinite;
+}
+
+/* 左上の丸2：薄いピンク */
+.blob-2 {
+  width: 200px;
+  height: 200px;
+  background-color: #e8a5b5;
+  top: 50px;
+  left: 80px;
+  animation: 
+    blob-morph-2 10s infinite,
+    blob-rotate-2 15s infinite;
+}
+
+/* 右下の丸3：濃い赤 */
+.blob-3 {
+  width: 280px;
+  height: 280px;
+  background-color: #a52a44;
+  bottom: 0;
+  right: 0;
+  animation: 
+    blob-morph-3 9s infinite,
+    blob-rotate-3 13s infinite;
+}
+
+/* 右下の丸4：薄いピンク */
+.blob-4 {
+  width: 220px;
+  height: 220px;
+  background-color: #f5c2d0;
+  bottom: 60px;
+  right: 100px;
+  animation: 
+    blob-morph-4 11s infinite,
+    blob-rotate-4 16s infinite;
+}
+
+/* 丸が変形するアニメーション - パターン1 */
+@keyframes blob-morph-1 {
+  0%, 100% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  25% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  75% {
+    border-radius: 70% 30% 40% 60% / 40% 70% 50% 30%;
+  }
+}
+
+/* 丸が変形するアニメーション - パターン2 */
+@keyframes blob-morph-2 {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  33% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  66% {
+    border-radius: 70% 30% 40% 60% / 40% 70% 50% 30%;
+  }
+}
+
+/* 丸が変形するアニメーション - パターン3 */
+@keyframes blob-morph-3 {
+  0%, 100% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+  30% {
+    border-radius: 70% 30% 40% 60% / 40% 70% 50% 30%;
+  }
+  60% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+}
+
+/* 丸が変形するアニメーション - パターン4 */
+@keyframes blob-morph-4 {
+  0%, 100% {
+    border-radius: 70% 30% 40% 60% / 40% 70% 50% 30%;
+  }
+  40% {
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  80% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
+
+/* 回転アニメーション - パターン1 */
+@keyframes blob-rotate-1 {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+}
+
+/* 回転アニメーション - パターン2 */
+@keyframes blob-rotate-2 {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-180deg) scale(0.95);
+  }
+}
+
+/* 回転アニメーション - パターン3 */
+@keyframes blob-rotate-3 {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(160deg) scale(1.08);
+  }
+}
+
+/* 回転アニメーション - パターン4 */
+@keyframes blob-rotate-4 {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-160deg) scale(0.92);
+  }
+}
+
+/* ロゴを配置する中央のコンテナ */
+.logo-container {
+  position: relative;
+  z-index: 10; /* 装飾より前面に表示 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ロゴ画像を入れる場所 */
+.logo-placeholder {
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ロゴ画像のスタイル（画像を追加したときに適用） */
+.logo-placeholder img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* レスポンシブ対応：小さい画面用 */
+@media (max-width: 768px) {
+  .decoration-top-left {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .decoration-bottom-right {
+    width: 320px;
+    height: 320px;
+  }
+  
+  .blob-1 {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .blob-2 {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .blob-3 {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .blob-4 {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .logo-placeholder {
+    width: 250px;
+    height: 250px;
+  }
+}
