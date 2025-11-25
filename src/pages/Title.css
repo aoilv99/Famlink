@@ -57,8 +57,8 @@
   width: 200px;
   height: 200px;
   background-color: #e8a5b5;
-  top: 50px;
-  left: 80px;
+  top: -10px;
+  left: 120px;
   animation: 
     blob-morph-2 10s infinite,
     blob-rotate-2 15s infinite;
@@ -78,11 +78,11 @@
 
 /* 右下の丸4：薄いピンク */
 .blob-4 {
-  width: 220px;
-  height: 220px;
+  width: 230px;
+  height: 230px;
   background-color: #f5c2d0;
-  bottom: 60px;
-  right: 100px;
+  bottom: -30px;
+  right: 130px;
   animation: 
     blob-morph-4 11s infinite,
     blob-rotate-4 16s infinite;
