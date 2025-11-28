@@ -29,14 +29,28 @@ const AuthScreen = () => {
   return (
     // 画面全体のコンテナ
     <div className="auth-container">
+      {/* タブレット・PC版の装飾：左上の静止した丸（768px以上で表示） */}
+      <div className="auth-decoration auth-decoration-top-left">
+        <div className="auth-blob auth-blob-1"></div>
+        <div className="auth-blob auth-blob-2"></div>
+      </div>
+
+      {/* タブレット・PC版の装飾：右下の静止した丸（768px以上で表示） */}
+      <div className="auth-decoration auth-decoration-bottom-right">
+        <div className="auth-blob auth-blob-3"></div>
+        <div className="auth-blob auth-blob-4"></div>
+      </div>
+
       {/* ロゴエリア：ロゴ画像を配置する場所 */}
       <div className="logo-section">
         {/* ロゴ画像のプレースホルダー */}
         <div className="logo-placeholder">
-          { <img src={LogoImage} alt="FamLink Logo" />}
+          {/* <img src="/path/to/your/logo.png" alt="FamLink Logo" /> */}
           {/* 上のコメントを外して、srcにロゴ画像のパスを指定してください */}
         </div>
         
+        {/* FamLinkのテキストロゴ（ロゴ画像にテキストが含まれる場合は削除可） */}
+        {<img src={LogoImage} alt="FamLink Logo" />}
       </div>
 
       {/* ボタンエリア：ログインと新規登録のボタンを配置 */}
