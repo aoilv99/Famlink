@@ -1,5 +1,6 @@
 import React from 'react';
 import './AuthScreen.css';
+import LogoImage from '../assets/titleIcon.png';
 
 /**
  * AuthScreen (認証画面) コンポーネント
@@ -48,7 +49,7 @@ const AuthScreen = ({ onGoToLogin, onGoToRegister }) => {
       <div className="logo-section">
         {/* ロゴ画像のプレースホルダー */}
         <div className="logo-placeholder">
-          {/* <img src="/path/to/your/logo.png" alt="FamLink Logo" /> */}
+          {<img src={LogoImage} alt="FamLink Logo" />}
           {/* 上のコメントを外して、srcにロゴ画像のパスを指定してください */}
         </div>
         
