@@ -45,12 +45,11 @@ const AuthScreen = () => {
       <div className="logo-section">
         {/* ロゴ画像のプレースホルダー */}
         <div className="logo-placeholder">
-          {/* <img src="/path/to/your/logo.png" alt="FamLink Logo" /> */}
+          {<img src={LogoImage} alt="FamLink Logo" />}
           {/* 上のコメントを外して、srcにロゴ画像のパスを指定してください */}
         </div>
         
         {/* FamLinkのテキストロゴ（ロゴ画像にテキストが含まれる場合は削除可） */}
-        {<img src={LogoImage} alt="FamLink Logo" />}
       </div>
 
       {/* ボタンエリア：ログインと新規登録のボタンを配置 */}
