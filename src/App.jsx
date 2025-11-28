@@ -3,7 +3,7 @@ import Title from "./pages/Title.jsx";           // アプリ起動時のロー�
 import HomePage from "./pages/HomePage.jsx";     // 認証済み（ログイン後）のメインコンテンツ
 import AuthScreen from "./pages/AuthScreen.jsx"; // 未認証（ログイン前）の画面
 import LoginScreen from "./pages/LoginScreen.jsx"; // ログイン画面
-// import RegisterScreen from "./pages/RegisterScreen.jsx"; // 新規登録画面（後で追加）
+import RegisterScreen from "./pages/RegisterScreen.jsx"; // 新規登録画面（後で追加）
 
 function App() {
   // === 状態管理 (State Hooks) ===
@@ -114,21 +114,13 @@ function App() {
 
   // 2-2. 新規登録画面（後で実装）
   if (currentScreen === 'register') {
-    // RegisterScreenコンポーネントが作成されたらコメントを外す
-    // return (
-    //   <RegisterScreen 
-    //     onRegisterSuccess={handleLoginSuccess}
-    //     onBackToAuth={handleBackToAuth}
-    //   />
-    // );
-    
-    // 一時的な表示（RegisterScreen実装前）
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h2>新規登録画面（準備中）</h2>
-        <button onClick={handleBackToAuth}>戻る</button>
-      </div>
+      <RegisterScreen 
+        onRegisterSuccess={handleLoginSuccess}
+        onBackToAuth={handleBackToAuth}
+      />
     );
+    
   }
 
   // 2-3. 初期画面（ログイン/新規登録選択）
