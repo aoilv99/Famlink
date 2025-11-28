@@ -188,24 +188,36 @@
   background-color: transparent; /* 背景を透明に */
   border: 2px solid #a52a44; /* 濃い赤色の枠線（2px） */
   color: #a52a44; /* 濃い赤色のテキスト */
+  outline: none; /* フォーカス時のアウトラインを削除 */
 }
 
 /* ログインボタンのホバー時（マウスを乗せたとき）
    - 薄いピンクの背景
    - 少し浮き上がる
-   - 影をつける */
+   - 影をつける
+   - 枠線の色は変えない */
 .login-button:hover {
   background-color: #f5e6e8; /* 薄いピンクの背景 */
+  border-color: #a52a44; /* 枠線の色を維持（赤のまま） */
   transform: translateY(-2px); /* 2px上に移動（浮き上がる） */
   box-shadow: 0 4px 12px rgba(165, 42, 68, 0.2); /* 影を追加 */
 }
 
 /* ログインボタンのアクティブ時（クリック時）
    - 浮き上がりを元に戻す
-   - 影を小さくする */
+   - 影を小さくする
+   - 枠線の色は変えない */
 .login-button:active {
+  border-color: #a52a44; /* 枠線の色を維持（赤のまま） */
   transform: translateY(0); /* 元の位置に戻す */
   box-shadow: 0 2px 8px rgba(165, 42, 68, 0.2); /* 影を小さく */
+}
+
+/* ログインボタンのフォーカス時（キーボード操作時）
+   - 枠線の色を変えない */
+.login-button:focus {
+  border-color: #a52a44; /* 枠線の色を維持（赤のまま） */
+  outline: none; /* デフォルトのアウトラインを削除 */
 }
 
 
@@ -215,30 +227,44 @@
    ======================================== */
 
 /* 新規登録ボタン：塗りつぶしのデザイン
-   - 赤い背景、白いテキスト */
+   - 赤い背景、白いテキスト
+   - ログインボタンと同じ大きさを保つため、背景と同じ色の枠線 */
 .register-button {
   background-color: #a52a44; /* 濃い赤色の背景 */
   color: #ffffff; /* 白色のテキスト */
-  border: 2px solid #a52a44; /* 背景と同じ色の枠線 */
+  border: 2px solid #a52a44; /* 背景と同じ色の枠線（大きさを揃えるため） */
+  outline: none; /* フォーカス時のアウトラインを削除 */
 }
 
 /* 新規登録ボタンのホバー時（マウスを乗せたとき）
    - より濃い赤色の背景
    - 少し浮き上がる
-   - 影をつける */
+   - 影をつける
+   - 枠線も同じ色に */
 .register-button:hover {
   background-color: #8b2339; /* より濃い赤色 */
-  border-color: #8b2339; /* 枠線も同じ色に */
+  border-color: #8b2339; /* 枠線も背景と同じ色に */
   transform: translateY(-2px); /* 2px上に移動（浮き上がる） */
   box-shadow: 0 4px 12px rgba(165, 42, 68, 0.3); /* 影を追加 */
 }
 
 /* 新規登録ボタンのアクティブ時（クリック時）
    - 浮き上がりを元に戻す
-   - 影を小さくする */
+   - 影を小さくする
+   - 枠線の色を維持 */
 .register-button:active {
+  background-color: #8b2339; /* より濃い赤色を維持 */
+  border-color: #8b2339; /* 枠線の色を維持 */
   transform: translateY(0); /* 元の位置に戻す */
   box-shadow: 0 2px 8px rgba(165, 42, 68, 0.3); /* 影を小さく */
+}
+
+/* 新規登録ボタンのフォーカス時（キーボード操作時・クリック後）
+   - 枠線の色を維持 */
+.register-button:focus {
+  background-color: #a52a44; /* 背景色を元に戻す */
+  border-color: #a52a44; /* 枠線の色を維持（赤のまま） */
+  outline: none; /* デフォルトのアウトラインを削除 */
 }
 
 
