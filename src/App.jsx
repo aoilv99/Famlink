@@ -1,22 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Title from "./pages/Title.jsx";           // アプリ起動時のローディング画面
 import HomePage from "./pages/HomePage.jsx";     // 認証済み（ログイン後）のメインコンテンツ
 import AuthScreen from "./pages/AuthScreen.jsx"; // 未認証（ログイン前）の画面
 import LoginScreen from "./pages/LoginScreen.jsx"; // ログイン画面
-import RegisterScreen from "./pages/RegisterScreen.jsx"; // 新規登録画面（後で追加）
+import RegisterScreen from "./pages/RegisterScreen.jsx"; // 新規登録画面
 
-function App() {
+// === プライベートルート（認証必須のルート） ===
+/**
+ * 認証が必要なページを保護するコンポーネント
+ * 未認証の場合は自動的に初期画面にリダイレクト
+ */
+function PrivateRoute({ children, isAuthenticated, isLoading }) {
+  if (isLoading) {
+    return <Title />;
+  }
+  return isAuthenticated ? children : <Navigate to="/auth" replace />;
+}
+
+// === パブリックルート（未認証専用のルート） ===
+/**
+ * 未認証時のみアクセス可能なページ
+ * 既にログイン済みの場合はホームにリダイレクト
+ */
+function PublicRoute({ children, isAuthenticated, isLoading }) {
+  if (isLoading) {
+    return <Title />;
+  }
+  return !isAuthenticated ? children : <Navigate to="/home" replace />;
+}
+
+// === メインアプリケーションロジック ===
+function AppContent() {
+  const navigate = useNavigate();
+  
   // === 状態管理 (State Hooks) ===
   
   // 画面の表示を制御する主要な状態
-  const [isLoading, setIsLoading] = useState(true);          // ① 初期ロード・認証チェック中か？
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ② ユーザーはログイン済みか？
-  
-  // 現在表示する画面を管理
-  // 'auth': 初期認証画面（ログイン/新規登録選択）
-  // 'login': ログイン画面
-  // 'register': 新規登録画面（後で追加）
-  const [currentScreen, setCurrentScreen] = useState('auth');
+  const [isLoading, setIsLoading] = useState(true);          // ① 初期ロード・認証チェック中か?
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // ② ユーザーはログイン済みか?
 
   // === 副作用 (Effect Hook) ===
   // アプリ起動時に一度だけ実行される初期化処理
@@ -46,21 +68,21 @@ function App() {
    * AuthScreen（ログイン/新規登録選択画面）からログイン画面への遷移
    */
   const handleGoToLogin = () => {
-    setCurrentScreen('login');
+    navigate('/login');
   };
 
   /**
    * AuthScreen（ログイン/新規登録選択画面）から新規登録画面への遷移
    */
   const handleGoToRegister = () => {
-    setCurrentScreen('register');
+    navigate('/register');
   };
 
   /**
    * ログイン画面から初期画面（AuthScreen）に戻る
    */
   const handleBackToAuth = () => {
-    setCurrentScreen('auth');
+    navigate('/auth');
   };
 
   /**
@@ -72,6 +94,8 @@ function App() {
     localStorage.setItem('authToken', token);
     // 認証済み状態に変更
     setIsAuthenticated(true);
+    // ホーム画面に遷移
+    navigate('/home');
   };
 
   /**
@@ -82,53 +106,88 @@ function App() {
     localStorage.removeItem('authToken');
     // 未認証状態に変更
     setIsAuthenticated(false);
-    // 初期画面に戻る
-    setCurrentScreen('auth');
+    // 初期画面に遷移
+    navigate('/auth');
   };
 
-  // === 条件付きレンダリング (画面の振り分け) ===
-
-  // 最優先: ローディングが完了するまで Title 画面を表示
-  if (isLoading) {
-    return <Title />;
-  }
-
-  // ローディング完了後: 認証状態に基づいて画面を切り替える
-  
-  // 1. 認証済みの場合 → ホーム画面を表示
-  if (isAuthenticated) {
-    return <HomePage onLogout={handleLogout} />;
-  }
-
-  // 2. 未認証の場合 → 現在の画面状態に応じて表示を切り替える
-  
-  // 2-1. ログイン画面
-  if (currentScreen === 'login') {
-    return (
-      <LoginScreen 
-        onLoginSuccess={handleLoginSuccess}
-        onBackToAuth={handleBackToAuth}
-      />
-    );
-  }
-
-  // 2-2. 新規登録画面（後で実装）
-  if (currentScreen === 'register') {
-    return (
-      <RegisterScreen 
-        onRegisterSuccess={handleLoginSuccess}
-        onBackToAuth={handleBackToAuth}
-      />
-    );
-    
-  }
-
-  // 2-3. 初期画面（ログイン/新規登録選択）
+  // === ルーティング設定 ===
   return (
-    <AuthScreen 
-      onGoToLogin={handleGoToLogin}
-      onGoToRegister={handleGoToRegister}
-    />
+    <Routes>
+      {/* デフォルトルート: 認証状態に応じて適切な画面にリダイレクト */}
+      <Route 
+        path="/" 
+        element={
+          isLoading ? (
+            <Title />
+          ) : isAuthenticated ? (
+            <Navigate to="/home" replace />
+          ) : (
+            <Navigate to="/auth" replace />
+          )
+        } 
+      />
+
+      {/* ホーム画面（認証必須） */}
+      <Route 
+        path="/home" 
+        element={
+          <PrivateRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <HomePage onLogout={handleLogout} />
+          </PrivateRoute>
+        } 
+      />
+
+      {/* 初期画面（ログイン/新規登録選択） */}
+      <Route 
+        path="/auth" 
+        element={
+          <PublicRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <AuthScreen 
+              onGoToLogin={handleGoToLogin}
+              onGoToRegister={handleGoToRegister}
+            />
+          </PublicRoute>
+        } 
+      />
+
+      {/* ログイン画面 */}
+      <Route 
+        path="/login" 
+        element={
+          <PublicRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <LoginScreen 
+              onLoginSuccess={handleLoginSuccess}
+              onBackToAuth={handleBackToAuth}
+            />
+          </PublicRoute>
+        } 
+      />
+
+      {/* 新規登録画面 */}
+      <Route 
+        path="/register" 
+        element={
+          <PublicRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <RegisterScreen 
+              onRegisterSuccess={handleLoginSuccess}
+              onBackToAuth={handleBackToAuth}
+            />
+          </PublicRoute>
+        } 
+      />
+
+      {/* 404: 存在しないパスは初期画面にリダイレクト */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+// === Appコンポーネント（Routerでラップ） ===
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
