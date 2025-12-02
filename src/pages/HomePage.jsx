@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 import happyImage from "../assets/happy.png";
 import sadImage from "../assets/sad.png";
@@ -83,9 +84,10 @@ const HomePage = () => {
   /**
    * 会いたいボタンがクリックされたときの処理
    */
+  const navigate = useNavigate();
+  
   const handleMeetRequest = () => {
-    console.log("会いたいボタンがクリックされました");
-    alert("会いたいリクエストを送信しました！");
+    navigate("/meetup");
   };
 
   /**
