@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MeetupPage.css";
+// アイコン画像のインポート（実際のパスに合わせて変更してください）
 import mealIcon from "../assets/meal.png";
 import teaIcon from "../assets/tea.png";
 import houseIcon from "../assets/house.png";
 import othersIcon from "../assets/others.png";
-import calenderIcon from "../assets/calendar.png";
 
 /**
  * MeetupPage (会いたい画面)
@@ -69,7 +69,7 @@ const MeetupPage = () => {
   const handleSubmit = () => {
     if (selectedOption) {
       console.log("選択された項目:", selectedOption);
-      // 次の画面に遷移（日程選択画面などに遷移する想定）
+      // 日程選択画面に遷移
       navigate("/schedule");
     }
   };
@@ -115,9 +115,7 @@ const MeetupPage = () => {
         onClick={handleSubmit}
         disabled={!selectedOption}
       >
-        <span className="calendar-icon">
-            <img src={calenderIcon} alt="カレンダー画像" />
-        </span>
+        <span className="calendar-icon">📅</span>
         日程を選ぶ
       </button>
     </div>
