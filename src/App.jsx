@@ -13,6 +13,9 @@ import LoginScreen from "./pages/LoginScreen.jsx"; // ログイン画面
 import RegisterScreen from "./pages/RegisterScreen.jsx"; // 新規登録画面
 import MeetupPage from "./pages/MeetupPage.jsx"; // 会いたい画面
 import SchedulePage from "./pages/SchedulePage.jsx"; // 日程調整画面
+import ConfirmationPage from "./pages/ConfirmationPage.jsx"; // 確認画面
+import CompletePage from "./pages/CompletePage.jsx"; // 送信完了画面
+import LineCallbackPage from "./pages/LineCallbackPage.jsx"; // LINEログインコールバック画面
 
 // === プライベートルート（認証必須のルート） ===
 /**
@@ -200,6 +203,34 @@ function AppContent() {
           <PrivateRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <SchedulePage />
           </PrivateRoute>
+        }
+      />
+
+      {/* 確認画面（認証必須） */}
+      <Route
+        path="/confirmation"
+        element={
+          <PrivateRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <ConfirmationPage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* 送信完了画面（認証必須） */}
+      <Route
+        path="/complete"
+        element={
+          <PrivateRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <CompletePage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* LINEログインコールバック画面（認証不要） */}
+      <Route
+        path="/line-callback"
+        element={
+          <LineCallbackPage onLoginSuccess={handleLoginSuccess} />
         }
       />
 
