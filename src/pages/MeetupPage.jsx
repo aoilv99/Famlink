@@ -69,8 +69,8 @@ const MeetupPage = () => {
   const handleSubmit = () => {
     if (selectedOption) {
       console.log("選択された項目:", selectedOption);
-      // 日程選択画面に遷移
-      navigate("/schedule");
+      // 日程選択画面に遷移（選択内容を渡す）
+      navigate("/schedule", { state: { meetupType: selectedOption } });
     }
   };
 
@@ -78,9 +78,9 @@ const MeetupPage = () => {
     <div className="meetup-container">
       {/* 戻るボタン */}
       <button className="back-button" onClick={handleBack}>
-        ←
+        <span style={{ fontSize: '48px' }}>←</span>
       </button>
-
+      
       {/* タイトルエリア */}
       <div className="meetup-header">
         <h1 className="meetup-title">会いたい</h1>
