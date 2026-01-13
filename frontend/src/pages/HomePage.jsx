@@ -49,28 +49,31 @@ const HomePage = ({ onLogout }) => {
   const [userData, setUserData] = useState(null);
 
   // バックエンドからデータを取ってくる関数
-  const fetchFamilyHistory = async (familyId, currentUserName) => {
+  const fetchFamilyHistory = async (familyId) => {
     try {
       const response = await fetch(`http://127.0.0.1:3001/api/messages/${familyId}`);
       const data = await response.json();
       
-      // 他の家族用のパステルパレット（感情パレットから取得）
-      const pastelPalette = emotions.map(e => e.color);
+      // 固定カラーパレット（元の赤色を先頭に、あとの5色はくすみパステル）
+      const colorPalette = [
+        "#a52a44", // メインの赤色
+        "#B39DDB", // くすみパステル紫
+        "#90CAF9", // くすみパステル青
+        "#A5D6A7", // くすみパステル緑
+        "#EF9A9A", // くすみパステル赤
+        "#FFF59D"  // くすみパステル黄
+      ];
+      
       const userColorMap = {};
 
       // バックエンドのデータ構造に合わせて整形
       const formattedData = data.map((msg) => {
         const name = msg.user_name || "不明";
         
+        // ユーザー名ごとに色を固定（誰がログインしていても結果は同じ）
         if (!userColorMap[name]) {
-          // 自分の名前、または "自分" という表示名なら元の赤色を割り当てる
-          if (name === currentUserName || name === "自分") {
-            userColorMap[name] = "#a52a44"; 
-          } else {
-            // 他のユーザーは名前のハッシュ値でパステルカラーを固定
-            const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-            userColorMap[name] = pastelPalette[hash % pastelPalette.length];
-          }
+          const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          userColorMap[name] = colorPalette[hash % colorPalette.length];
         }
 
         return {
@@ -99,8 +102,7 @@ const HomePage = ({ onLogout }) => {
           const data = await response.json();
           setUserData(data);
           if (data.family_id) {
-            // ステートの更新を待たずに、取得した直後のデータを渡す
-            fetchFamilyHistory(data.family_id, data.user_name || "自分");
+            fetchFamilyHistory(data.family_id);
           }
         }
       } catch (error) {
@@ -172,7 +174,7 @@ const HomePage = ({ onLogout }) => {
       if (response.ok) {
         setIsSent(true);
         // ★送信に成功したら、リストを再読み込みする
-        fetchFamilyHistory(userData.family_id, userData.user_name || "自分");
+        fetchFamilyHistory(userData.family_id);
 
         setTimeout(() => {
           setIsSent(false);
