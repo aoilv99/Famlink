@@ -220,6 +220,22 @@ app.get('/api/messages/:family_id', (req, res) => {
   });
 });
 
+// 6. 家族脱退 API
+app.post('/api/families/leave', (req, res) => {
+  const { email } = req.body;
+  const sqlUpdateUser = 'UPDATE users SET family_id = NULL WHERE email = ?';
+
+  db.query(sqlUpdateUser, [email], (err, result) => {
+    if (err) {
+      console.error('脱退エラー:', err);
+      return res.status(500).send(err);
+    }
+    res.send({ message: '家族グループから脱退しました。' });
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
