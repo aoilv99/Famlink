@@ -45,6 +45,9 @@ const HomePage = ({ onLogout }) => {
   // 最近の家族の様子
   const [familyHistory, setFamilyHistory] = useState([]);
 
+  // 家族からの要望
+  const [schedules, setSchedules] = useState([]);
+
   // ユーザー情報の状態
   const [userData, setUserData] = useState(null);
 
@@ -58,22 +61,18 @@ const HomePage = ({ onLogout }) => {
       const colorPalette = [
         "#a52a44", // 1番目：メインの赤色
         "#B39DDB", // 2番目：くすみパステル紫
-        "#90CAF9", // 3番目：くすみパステル青
-        "#A5D6A7", // 4番目：くすみパステル緑
-        "#EF9A9A", // 5番目：くすみパステル赤
-        "#FFF59D"  // 6番目：くすみパステル黄
+        "#90CAF9", // 3番目 : くすみパステル青
+        "#A5D6A7", // 4番目 : くすみパステル緑
+        "#EF9A9A", // 5番目 : くすみパステル赤
+        "#FFF59D"  // 6番目 : くすみパステル黄
       ];
       
-      // 1. 全データからユニークなユーザー名を抽出
       const uniqueNames = [...new Set(data.map(msg => msg.user_name || "不明"))].sort();
-      
-      // 2. 名前ごとにパレットから色を固定割り当て（名前順）
       const userColorMap = {};
       uniqueNames.forEach((name, index) => {
         userColorMap[name] = colorPalette[index % colorPalette.length];
       });
 
-      // 3. バックエンドのデータ構造に合わせて整形
       const formattedData = data.map((msg) => {
         const name = msg.user_name || "不明";
         return {
@@ -84,15 +83,44 @@ const HomePage = ({ onLogout }) => {
           color: userColorMap[name],
         };
       });
-      setFamilyHistory(formattedData);
+
+      // 新着チェック：件数が増えていたら通知ドットをつける
+      setFamilyHistory(prev => {
+        if (prev.length > 0 && formattedData.length > prev.length) {
+          setHasNotification(true);
+        }
+        return formattedData;
+      });
     } catch (error) {
       console.error("データ取得失敗:", error);
     }
   };
 
-  // 画面が開いた時に一回だけ実行
+  // スケジュール（要望）を取得する関数
+  const fetchSchedules = async (familyId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:3001/api/schedules/${familyId}`);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // 新着チェック
+        setSchedules(prev => {
+          if (prev.length > 0 && data.length > prev.length) {
+            setHasNotification(true);
+          }
+          return data;
+        });
+      }
+    } catch (error) {
+      console.error("スケジュール取得失敗:", error);
+    }
+  };
+
+  // 画面が開いた時に実行 & ポーリング設定
   useEffect(() => {
-    const fetchUserData = async () => {
+    let intervalId;
+
+    const initializeData = async () => {
       const email = localStorage.getItem('authToken');
       if (!email) return;
 
@@ -101,16 +129,30 @@ const HomePage = ({ onLogout }) => {
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
+          
           if (data.family_id) {
+            // 初回読み込み
             fetchFamilyHistory(data.family_id);
+            fetchSchedules(data.family_id);
+
+            // 5秒おきに自動更新（リアルタイム通知用）
+            intervalId = setInterval(() => {
+              fetchFamilyHistory(data.family_id);
+              fetchSchedules(data.family_id);
+            }, 5000);
           }
         }
       } catch (error) {
-        console.error("ユーザー情報取得失敗:", error);
+        console.error("初期化失敗:", error);
       }
     };
 
-    fetchUserData();
+    initializeData();
+
+    // クリーンアップ
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   /**
@@ -141,9 +183,6 @@ const HomePage = ({ onLogout }) => {
     setComment(selectedEmotion.name);
   };
 
-  /**
-   * 送信ボタンがクリックされたときの処理
-   */
   /**
    * 送信ボタンがクリックされたときの処理
    */
@@ -194,6 +233,19 @@ const HomePage = ({ onLogout }) => {
 
   const handleMeetRequest = () => {
     navigate("/meetup");
+  };
+
+  /**
+   * 会いたい要望の表示用テキスト
+   */
+  const getMeetupTypeText = (type) => {
+    const types = {
+      meal: "ご飯を食べたい",
+      tea: "おしゃべりしたい",
+      house: "顔を見たい",
+      others: "会いたい"
+    };
+    return types[type] || "会いたい";
   };
 
   /**
@@ -333,6 +385,24 @@ const HomePage = ({ onLogout }) => {
           </>
         )}
       </button>
+
+      {/* 家族からの要望セクション */}
+      {schedules.length > 0 && (
+        <div className="schedules-container">
+          <h2 className="history-title">家族からの会いたい要望</h2>
+          <div className="schedules-list">
+            {schedules.map((schedule) => (
+              <div key={schedule.id} className="schedule-card" onClick={() => navigate("/confirmation", { state: { meetupType: schedule.meetup_type, timeRanges: JSON.parse(schedule.time_ranges), readOnly: true } })}>
+                <div className="schedule-card-content">
+                  <span className="schedule-sender"><strong>{schedule.sender_name}</strong>さんから</span>
+                  <span className="schedule-type">「{getMeetupTypeText(schedule.meetup_type)}」の要望が届いています</span>
+                </div>
+                <div className="schedule-arrow">＞</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 最近の家族の様子 */}
       <div className="family-history">
