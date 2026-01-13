@@ -17,11 +17,11 @@ import sendImage from "../assets/send.png";
 const HomePage = ({ onLogout }) => {
   // 感情の定義（5つの感情）
   const emotions = [
-    {id: "fun", name: "楽しい", image: funImage, color: "#9c27b0"},
-    {id: "sad", name: "悲しい", image: sadImage, color: "#2196f3"},
-    {id: "normal", name: "普通", image: normalImage, color: "#4caf50"},
-    {id: "angry", name: "怒り", image: angryImage, color: "#f44336"},
-    {id: "happy", name: "嬉しい", image: happyImage, color: "#ffc107"},
+    {id: "fun", name: "楽しい", image: funImage, color: "#B39DDB"}, // くすみパステル紫
+    {id: "sad", name: "悲しい", image: sadImage, color: "#90CAF9"}, // くすみパステル青
+    {id: "normal", name: "普通", image: normalImage, color: "#A5D6A7"}, // くすみパステル緑
+    {id: "angry", name: "怒り", image: angryImage, color: "#EF9A9A"}, // くすみパステル赤
+    {id: "happy", name: "嬉しい", image: happyImage, color: "#FFF59D"}, // くすみパステル黄
   ];
 
   // 現在選択されている感情のインデックス（デフォルトは真ん中の normal = 普通）
@@ -288,9 +288,9 @@ const HomePage = ({ onLogout }) => {
             onTouchEnd={handleSliderEnd}
             className="slider-input"
             style={{
-              background: `linear-gradient(to right, #a52a44 0%, #a52a44 ${
+              background: `linear-gradient(to right, ${emotions[selectedIndex].color} 0%, ${emotions[selectedIndex].color} ${
                 (selectedIndex / 4) * 100
-              }%, #e0e0e0 ${(selectedIndex / 4) * 100}%, #e0e0e0 100%)`,
+              }%, #f0f0f0 ${(selectedIndex / 4) * 100}%, #f0f0f0 100%)`,
             }}
           />
         </div>
