@@ -53,14 +53,28 @@ const HomePage = ({ onLogout }) => {
     try {
       const response = await fetch(`http://127.0.0.1:3001/api/messages/${familyId}`);
       const data = await response.json();
+      
+      // 感情パレットの色を取得
+      const emotionPalette = emotions.map(e => e.color);
+      const userColorMap = {};
+
       // バックエンドのデータ構造に合わせて整形
-      const formattedData = data.map((msg) => ({
-        name: msg.user_name,
-        emotion: msg.emotion,
-        comment: msg.comment,
-        time: new Date(msg.created_at).toLocaleTimeString(), // 時間を読みやすく
-        color: "#a52a44", // 好きな色に
-      }));
+      const formattedData = data.map((msg) => {
+        // ユーザー名ごとに色を固定するためのロジック
+        // 名前からハッシュ値を計算して、パレットから色を選択する
+        if (!userColorMap[msg.user_name]) {
+          const hash = msg.user_name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          userColorMap[msg.user_name] = emotionPalette[hash % emotionPalette.length];
+        }
+
+        return {
+          name: msg.user_name,
+          emotion: msg.emotion,
+          comment: msg.comment,
+          time: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          color: userColorMap[msg.user_name], // ユーザーごとに割り当てられた色
+        };
+      });
       setFamilyHistory(formattedData);
     } catch (error) {
       console.error("データ取得失敗:", error);
