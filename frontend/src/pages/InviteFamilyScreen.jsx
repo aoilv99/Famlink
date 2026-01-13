@@ -62,7 +62,14 @@ const InviteFamilyScreen = () => {
       });
 
       if (response.ok) {
-        console.log('家族グループ作成完了');
+        const data = await response.json();
+        console.log('家族グループ作成完了:', data);
+        
+        // 成功したら家族IDをローカルストレージに保存
+        if (data.family_id) {
+          localStorage.setItem('familyId', data.family_id);
+        }
+        
         // ホーム画面に遷移
         navigate('/home');
       } else {

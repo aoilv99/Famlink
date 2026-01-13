@@ -20,6 +20,12 @@ const JoinFamilyScreen = () => {
     e.preventDefault();
     const email = localStorage.getItem('authToken'); // トークン（email）を取得
     
+    if (!email) {
+      alert('ログインが必要です');
+      navigate('/auth');
+      return;
+    }
+
     try {
       const response = await fetch('http://127.0.0.1:3001/api/families/join', {
         method: 'POST',
@@ -31,7 +37,14 @@ const JoinFamilyScreen = () => {
       });
 
       if (response.ok) {
-        console.log('家族に参加成功');
+        const data = await response.json();
+        console.log('家族に参加成功:', data);
+        
+        // 成功したら家族IDをローカルストレージに保存
+        if (data.family_id) {
+          localStorage.setItem('familyId', data.family_id);
+        }
+        
         // ホーム画面に遷移
         navigate('/home');
       } else {
