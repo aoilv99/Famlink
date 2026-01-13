@@ -32,6 +32,20 @@ const initializeDatabase = async () => {
       console.log('invite_code カラムを新しく追加しました');
     }
 
+    // schedules テーブルの作成（存在しない場合）
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS schedules (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        family_id VARCHAR(50) NOT NULL,
+        sender_name VARCHAR(50) NOT NULL,
+        meetup_type VARCHAR(20) NOT NULL,
+        time_ranges JSON NOT NULL,
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('schedules テーブルを確認/作成しました');
+
     // テーブル一覧の表示（デバッグ用）
     const [tables] = await pool.query('SHOW TABLES');
     console.log('存在するテーブル:', tables.map(t => Object.values(t)[0]));

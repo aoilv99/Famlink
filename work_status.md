@@ -32,21 +32,23 @@
 ### バックエンド (backend/index.js)
 - Expressサーバーの構築。
 - MySQLデータベースへの接続設定。
-- **DBの自動更新**: 起動時に `users` テーブルに `invite_code` カラムを自動追加する機能。
+- **DBの自動更新**: 起動時に `users` テーブルへのカラム追加、および `schedules` テーブルの自動作成機能を実装。
 - **APIエンドポイント**:
-    - `POST /api/register`: ユーザー登録（**一意の固定招待コードの自動生成に対応**）。
-    - `POST /api/login`: ユーザー認証（**既存ユーザーへの招待コード割り当てに対応**）。
-    - `POST /api/families/create`: 家族グループの作成と招待コードの登録。
-    - `POST /api/families/join`: 招待コードによる家族グループへの参加。
-    - `GET /api/users/:email`: ユーザー情報（所属家族ID含む）の取得。
-    - `POST /api/messages`: ユーザーの感情とコメントを保存。
-    - `GET /api/messages/:family_id`: 特定の家族のメッセージ履歴を取得。
+    - `POST /api/register`: ユーザー登録。
+    - `POST /api/login`: ユーザー認証。
+    - `POST /api/families/create`: 家族グループの作成。
+    - `POST /api/families/join`: 招待コードによる参加。
+    - `GET /api/users/:email`: ユーザー情報取得。
+    - `POST /api/messages`: 感情メッセージの保存。
+    - `GET /api/messages/:family_id`: 履歴取得。
+    - `POST /api/families/leave`: 家族脱退。
+    - **`POST /api/schedules`**: 会いたい要望（日程調整）の保存。
+    - **`GET /api/schedules/:family_id`**: 家族の要望一覧取得。
 
 ## 今後の課題・未実装事項
-1. **日程調整機能の詳細**: `SchedulePage.jsx` における具体的な日時選択ロジックの構築。
-2. **LINE通知連携**: 感情共有や会いたい要望が送られた際のLINE通知機能。
-3. **セキュリティ向上**: パスワードのハッシュ化（bcrypt）やJWTトークンの導入。
-4. **UI/UXのブラッシュアップ**: レスポンシブ対応の強化。
+1. **要望の承認・調整機能**: `SchedulePage.jsx` やホーム画面で届いた要望を確認し、承諾するフローの実装。
+2. **LINE通知連携**: 要望が送られた際のリアルタイム通知。
+3. **セキュリティ向上**: パスワードのハッシュ化（bcrypt)。
 
 ---
 作成日: 2026年1月13日

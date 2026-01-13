@@ -7,6 +7,7 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const familyRoutes = require('./routes/familyRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
 
 const app = express();
 app.use(express.json());
@@ -16,6 +17,7 @@ app.use(cors());
 app.use('/api', userRoutes);     // /api/register, /api/login, /api/users/:email
 app.use('/api/families', familyRoutes); // /api/families/create, join, leave
 app.use('/api/messages', messageRoutes); // /api/messages/ (GET/POST)
+app.use('/api/schedules', scheduleRoutes); // /api/schedules/ (GET/POST)
 
 
 const PORT = process.env.PORT || 3001;

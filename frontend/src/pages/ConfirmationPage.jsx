@@ -23,11 +23,47 @@ const ConfirmationPage = () => {
   /**
    * 送信ボタンがクリックされたときの処理
    */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("送信データ:", { timeRanges, meetupType });
-    
-    // 送信完了画面に遷移
-    navigate("/complete");
+
+    const email = localStorage.getItem('authToken');
+    const familyId = localStorage.getItem('familyId');
+
+    if (!email || !familyId) {
+      alert("ユーザー情報が不足しています。再度ログインしてください。");
+      return;
+    }
+
+    try {
+      // ユーザー名を取得するために API を叩く
+      const userResponse = await fetch(`http://127.0.0.1:3001/api/users/${email}`);
+      const userData = await userResponse.json();
+      const senderName = userData.user_name || email.split('@')[0];
+
+      // スケジュールを保存
+      const response = await fetch('http://127.0.0.1:3001/api/schedules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          family_id: familyId,
+          sender_name: senderName,
+          meetup_type: meetupType,
+          time_ranges: timeRanges
+        })
+      });
+
+      if (response.ok) {
+        console.log("スケジュール保存成功");
+        // 送信完了画面に遷移
+        navigate("/complete");
+      } else {
+        const errorData = await response.json();
+        alert("送信に失敗しました: " + (errorData.message || "サーバーエラー"));
+      }
+    } catch (error) {
+      console.error("送信エラー:", error);
+      alert("サーバーに接続できませんでした。");
+    }
   };
 
   /**
