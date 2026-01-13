@@ -15,10 +15,13 @@ const userController = {
       }
 
       const result = await userService.registerUser(email, password, user_name);
-      res.send({ message: '登録完了！', ...result });
+      res.status(201).send({ message: '登録完了！', ...result });
     } catch (err) {
+      if (err.message === 'ALREADY_EXISTS') {
+        return res.status(409).json({ message: 'このメールアドレスは既に登録されています' });
+      }
       console.error('登録エラー:', err);
-      res.status(500).json({ message: err.message });
+      res.status(500).json({ message: 'サーバーエラーが発生しました' });
     }
   },
 

@@ -8,13 +8,18 @@ const userService = {
   // ユーザー登録処理
   registerUser: async (email, password, user_name) => {
     console.log(`新規ユーザー登録試行: ${email}`);
+    
+    // 1. メールアドレスの重複チェック
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      console.log('登録失敗: メールアドレスが既に存在します');
+      throw new Error('ALREADY_EXISTS');
+    }
+
     const invite_code = generateInviteCode();
     try {
       const userId = await User.create(email, password, user_name, invite_code);
       console.log(`User.create から返ってきたID: ${userId}`);
-      if (!userId) {
-        console.warn('警告: User.create が有効な ID を返しませんでした。');
-      }
       return { userId, invite_code };
     } catch (err) {
       console.error('User.create 実行中にエラー:', err.message);
