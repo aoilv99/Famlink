@@ -11,8 +11,11 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 20, // 10 -> 20 に増やす
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  initSql: "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED" // ロック競合を減らす
 });
 
 /**

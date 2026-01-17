@@ -17,6 +17,9 @@ const InviteFamilyScreen = () => {
   // コピー完了の状態
   const [copied, setCopied] = useState(false);
 
+  // 送信中の状態
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   /**
    * コンポーネントがマウントされたときに招待コードを読み込む
    */
@@ -48,6 +51,9 @@ const InviteFamilyScreen = () => {
    * 完了ボタンがクリックされたときの処理
    */
   const handleComplete = async () => {
+    if (isSubmitting) return; // 送信中は無視
+    setIsSubmitting(true);
+
     const email = localStorage.getItem('authToken'); // トークン（email）を取得
     
     try {
@@ -73,12 +79,14 @@ const InviteFamilyScreen = () => {
         // ホーム画面に遷移
         navigate('/home');
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
         alert('作成失敗: ' + (errorData.message || 'サーバーエラー'));
       }
     } catch (error) {
       console.error('通信エラー:', error);
       alert('サーバーに接続できませんでした');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -140,10 +148,11 @@ const InviteFamilyScreen = () => {
         {/* 完了ボタン */}
         <button
           type="button"
-          className="invite-family-complete-button"
+          className={`invite-family-complete-button ${isSubmitting ? 'disabled' : ''}`}
           onClick={handleComplete}
+          disabled={isSubmitting}
         >
-          完了
+          {isSubmitting ? '処理中...' : '完了'}
         </button>
 
         {/* 戻るボタン */}

@@ -363,7 +363,7 @@
 /* チェックマーク（小さく修正） */
 .checkmark {
   color: white;
-  font-size: 24px;
+  font-size: 18px; /* 修正 */
   font-weight: bold;
   line-height: 1;
   display: inline-flex;

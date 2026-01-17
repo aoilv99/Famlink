@@ -8,14 +8,18 @@ const db = require('../config/db');
 const familyService = {
   // 家族グループ作成
   createFamily: async (family_id, family_name, email) => {
-    const existingFamily = await Family.findById(family_id);
+    // 家族IDを正規化（大文字、記号なし）して統一
+    const normalizedFamilyId = family_id.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    console.log(`家族作成: Original=${family_id}, Normalized=${normalizedFamilyId}`);
+
+    const existingFamily = await Family.findById(normalizedFamilyId);
     
     if (!existingFamily) {
-      await Family.create(family_id, family_name || '家族');
+      await Family.create(normalizedFamilyId, family_name || '家族');
     }
     
-    await User.updateFamilyId(email, family_id);
-    return family_id;
+    await User.updateFamilyId(email, normalizedFamilyId);
+    return normalizedFamilyId;
   },
 
   // 家族グループ参加

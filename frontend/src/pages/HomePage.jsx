@@ -39,6 +39,9 @@ const HomePage = ({ onLogout }) => {
   // 設定メニューの表示状態
   const [showMenu, setShowMenu] = useState(false);
 
+  // 招待コードがコピーされたかの状態
+  const [inviteCopied, setInviteCopied] = useState(false);
+
   // スライダーがドラッグ中かどうかの状態
   const [isDragging, setIsDragging] = useState(false);
 
@@ -53,8 +56,15 @@ const HomePage = ({ onLogout }) => {
 
   // バックエンドからデータを取ってくる関数
   const fetchFamilyHistory = async (familyId) => {
+    if (!familyId) return; // IDがない場合は何もしない
+    
     try {
       const response = await fetch(`http://127.0.0.1:3001/api/messages/${familyId}`);
+      if (!response.ok) {
+        console.warn(`データ取得失敗 (Status: ${response.status}) - 前回のデータを維持します`);
+        return; // エラー時は更新せず終了（点滅防止）
+      }
+
       const data = await response.json();
       
       // 固定カラーパレット（元の赤色を先頭に、あとの5色はくすみパステル）
@@ -92,27 +102,34 @@ const HomePage = ({ onLogout }) => {
         return formattedData;
       });
     } catch (error) {
-      console.error("データ取得失敗:", error);
+      console.error("データ取得中の通信エラー:", error);
+      // エラー時も更新しない（前回のデータを維持）
     }
   };
 
   // スケジュール（要望）を取得する関数
   const fetchSchedules = async (familyId) => {
+    if (!familyId) return;
+
     try {
       const response = await fetch(`http://127.0.0.1:3001/api/schedules/${familyId}`);
-      if (response.ok) {
-        const data = await response.json();
-        
-        // 新着チェック
-        setSchedules(prev => {
-          if (prev.length > 0 && data.length > prev.length) {
-            setHasNotification(true);
-          }
-          return data;
-        });
+      if (!response.ok) {
+        console.warn(`スケジュール取得失敗 (Status: ${response.status}) - 前回のデータを維持します`);
+        return;
       }
+
+      const data = await response.json();
+      
+      // 新着チェック
+      setSchedules(prev => {
+        if (prev.length > 0 && data.length > prev.length) {
+          setHasNotification(true);
+        }
+        return data;
+      });
     } catch (error) {
       console.error("スケジュール取得失敗:", error);
+      // エラー時も更新しない
     }
   };
 
@@ -215,6 +232,7 @@ const HomePage = ({ onLogout }) => {
         // ★送信に成功したら、リストを再読み込みする
         fetchFamilyHistory(userData.family_id);
 
+        // 3秒後に送信完了表示を消し、コメントをリセットする（ユーザー要望により復活）
         setTimeout(() => {
           setIsSent(false);
           setComment(emotions[selectedIndex].name);
@@ -285,6 +303,23 @@ const HomePage = ({ onLogout }) => {
     onLogout();
   };
 
+  /**
+   * 家族招待コードをコピーする処理
+   */
+  const handleInviteFamily = () => {
+    if (userData && userData.family_id) {
+      navigator.clipboard.writeText(userData.family_id);
+      setInviteCopied(true);
+      
+      // 2秒後にコピー完了表示を消す
+      setTimeout(() => {
+        setInviteCopied(false);
+      }, 2000);
+    } else {
+      alert("招待コードを取得できませんでした。");
+    }
+  };
+
   return (
     <div className="home-container">
       {/* 右上ボタンエリア */}
@@ -303,6 +338,9 @@ const HomePage = ({ onLogout }) => {
           {showMenu && (
             <div className="settings-dropdown">
               <button onClick={handleLogoutAndLeave}>ログアウト（家族脱退）</button>
+              <button onClick={handleInviteFamily}>
+                {inviteCopied ? 'コピーしました！' : '家族を招待'}
+              </button>
             </div>
           )}
         </div>
