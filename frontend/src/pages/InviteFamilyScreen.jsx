@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import './InviteFamilyScreen.css';
-import LogoImage from '../assets/titleIcon.png';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from "react";
+import "./InviteFamilyScreen.css";
+import LogoImage from "../assets/titleIcon.png";
+import {useNavigate} from "react-router-dom";
 
 /**
  * InviteFamilyScreen (家族招待画面) コンポーネント
@@ -10,10 +10,10 @@ import { useNavigate } from 'react-router-dom';
  */
 const InviteFamilyScreen = () => {
   const navigate = useNavigate();
-  
+
   // 招待コードの状態管理
-  const [inviteCode, setInviteCode] = useState('');
-  
+  const [inviteCode, setInviteCode] = useState("");
+
   // コピー完了の状態
   const [copied, setCopied] = useState(false);
 
@@ -25,12 +25,12 @@ const InviteFamilyScreen = () => {
    */
   useEffect(() => {
     // localStorage から保存済みの招待コードを取得
-    const savedCode = localStorage.getItem('inviteCode');
+    const savedCode = localStorage.getItem("inviteCode");
     if (savedCode) {
       setInviteCode(savedCode);
     } else {
       // 招待コードがない場合はユーザー情報を再取得するなどの対応が可能
-      console.warn('招待コードが見つかりません');
+      console.warn("招待コードが見つかりません");
     }
   }, []);
 
@@ -40,7 +40,7 @@ const InviteFamilyScreen = () => {
   const handleCopyCode = () => {
     navigator.clipboard.writeText(inviteCode);
     setCopied(true);
-    
+
     // 2秒後にコピー完了表示を消す
     setTimeout(() => {
       setCopied(false);
@@ -54,37 +54,43 @@ const InviteFamilyScreen = () => {
     if (isSubmitting) return; // 送信中は無視
     setIsSubmitting(true);
 
-    const email = localStorage.getItem('authToken'); // トークン（email）を取得
-    
+    const email = localStorage.getItem("authToken"); // トークン（email）を取得
+
     try {
-      const response = await fetch('http://127.0.0.1:3001/api/families/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          family_id: inviteCode, 
-          family_name: '我が家', 
-          email: email 
-        })
-      });
+      console.log("familyscreen+60");
+      const response = await fetch(
+        "http://127.0.0.1:3001/api/families/create",
+        {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            family_id: inviteCode,
+            family_name: "我が家",
+            email: email,
+          }),
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
-        console.log('家族グループ作成完了:', data);
-        
+        console.log("家族グループ作成完了:", data);
+
         // 成功したら家族IDをローカルストレージに保存
         if (data.family_id) {
-          localStorage.setItem('familyId', data.family_id);
+          localStorage.setItem("familyId", data.family_id);
         }
-        
+
         // ホーム画面に遷移
-        navigate('/home');
+        navigate("/home");
       } else {
-        const errorData = await response.json().catch(() => ({ message: '不明なエラー' }));
-        alert('作成失敗: ' + (errorData.message || 'サーバーエラー'));
+        const errorData = await response
+          .json()
+          .catch(() => ({message: "不明なエラー"}));
+        alert("作成失敗: " + (errorData.message || "サーバーエラー"));
       }
     } catch (error) {
-      console.error('通信エラー:', error);
-      alert('サーバーに接続できませんでした');
+      console.error("通信エラー:", error);
+      alert("サーバーに接続できませんでした");
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +100,7 @@ const InviteFamilyScreen = () => {
    * 戻るボタンがクリックされたときの処理
    */
   const handleGoBack = () => {
-    navigate('/family-select');
+    navigate("/family-select");
   };
 
   return (
@@ -134,25 +140,25 @@ const InviteFamilyScreen = () => {
           <div className="invite-code-display">
             <span className="invite-code-text">{inviteCode}</span>
           </div>
-          
+
           {/* コピーボタン */}
           <button
             type="button"
-            className={`copy-button ${copied ? 'copied' : ''}`}
+            className={`copy-button ${copied ? "copied" : ""}`}
             onClick={handleCopyCode}
           >
-            {copied ? 'コピーしました！' : 'コピーする'}
+            {copied ? "コピーしました！" : "コピーする"}
           </button>
         </div>
 
         {/* 完了ボタン */}
         <button
           type="button"
-          className={`invite-family-complete-button ${isSubmitting ? 'disabled' : ''}`}
+          className={`invite-family-complete-button ${isSubmitting ? "disabled" : ""}`}
           onClick={handleComplete}
           disabled={isSubmitting}
         >
-          {isSubmitting ? '処理中...' : '完了'}
+          {isSubmitting ? "処理中..." : "完了"}
         </button>
 
         {/* 戻るボタン */}

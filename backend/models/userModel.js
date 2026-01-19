@@ -11,14 +11,28 @@ const User = {
   },
 
   // 新規ユーザー登録
-  create: async (email, password, user_name, invite_code) => {
+create: async (email, password, user_name, invite_code) => {
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    
     console.log(`SQL実行: INSERT INTO users (email, password, user_name, invite_code) VALUES ('${email}', '...', '${user_name}', '${invite_code}')`);
-    const [result] = await db.execute(
+    
+    const [result] = await connection.execute(
       'INSERT INTO users (email, password, user_name, invite_code) VALUES (?, ?, ?, ?)',
       [email, password, user_name, invite_code]
     );
+    
+    await connection.commit();
+    
     return result.insertId;
-  },
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+},
 
   // ユーザーの家族IDを更新
   updateFamilyId: async (email, family_id) => {

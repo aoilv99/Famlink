@@ -27,6 +27,12 @@ const SchedulePage = () => {
   const [selectedEndHour, setSelectedEndHour] = useState("--");
   const [selectedEndMinute, setSelectedEndMinute] = useState("--");
 
+  // 直接入力で保存された日程リスト
+  const [savedDirectRanges, setSavedDirectRanges] = useState([]);
+  
+  // 編集中のインデックス（-1なら新規作成）
+  const [editingIndex, setEditingIndex] = useState(-1);
+
   // カレンダー表示用の状態
   const getStartOfWeek = (date) => {
     const newDate = new Date(date);
@@ -171,21 +177,10 @@ const SchedulePage = () => {
       // 新規選択
       setSelectedTimeSlots(prev => [...prev, slot]);
     }
-
-    // 直接指定も更新（最初の選択のみ）
-    if (selectedTimeSlots.length === 0 && !isSelected) {
-      setSelectedYear(date.getFullYear());
-      setSelectedMonth(date.getMonth() + 1);
-      setSelectedDay(date.getDate());
-      setSelectedStartHour(hour.toString());
-      setSelectedStartMinute(minute.toString());
-    }
   };
 
   /**
    * 選択された時間スロットを時間範囲にグループ化
-   * 連続する30分スロットを1つの時間範囲にまとめる
-   * 例: [{date: "2025/12/1", ranges: [{start: "13:00", end: "16:30"}]}]
    */
   const getGroupedTimeRanges = () => {
     if (selectedTimeSlots.length === 0) return [];
@@ -255,29 +250,97 @@ const SchedulePage = () => {
   };
 
   /**
-   * 直接指定の時間を取得
-   * 開始時間と終了時間（オプション）を含む時間範囲オブジェクトを返す
+   * 直接入力の日程を保存
    */
-  const getDirectTimeRange = () => {
-    // 開始時間が未選択の場合はnullを返す
+  const handleSaveDirectRange = () => {
+    // 開始時間が未選択の場合は何もしない
     if (selectedStartHour === "--" || selectedStartMinute === "--") {
-      return null;
+      alert("開始時間を選択してください");
+      return;
     }
 
     const startTime = `${selectedStartHour.toString().padStart(2, "0")}:${selectedStartMinute.toString().padStart(2, "0")}`;
     const endTime = selectedEndHour !== "--" && selectedEndMinute !== "--"
       ? `${selectedEndHour.toString().padStart(2, "0")}:${selectedEndMinute.toString().padStart(2, "0")}`
-      : null;
+      : "未指定";
 
-    return {
+    const newRange = {
       date: `${selectedYear}/${selectedMonth}/${selectedDay}`,
-      ranges: [{ start: startTime, end: endTime || "未指定" }]
+      ranges: [{ start: startTime, end: endTime }]
     };
+
+    if (editingIndex >= 0) {
+      // 編集モード：既存の日程を更新
+      const updated = [...savedDirectRanges];
+      updated[editingIndex] = newRange;
+      setSavedDirectRanges(updated);
+      setEditingIndex(-1);
+    } else {
+      // 新規追加
+      setSavedDirectRanges(prev => [...prev, newRange]);
+    }
+
+    // フォームをリセット
+    resetDirectInputForm();
   };
 
   /**
-   * 表示用の時間範囲を取得（カレンダー選択 + 直接指定）
-   * 両方の選択を統合して表示用の配列を返す
+   * 直接入力フォームをリセット
+   */
+  const resetDirectInputForm = () => {
+    setSelectedStartHour("--");
+    setSelectedStartMinute("--");
+    setSelectedEndHour("--");
+    setSelectedEndMinute("--");
+  };
+
+  /**
+   * 保存された日程を編集
+   */
+  const handleEditDirectRange = (index) => {
+    const range = savedDirectRanges[index];
+    const [year, month, day] = range.date.split('/').map(Number);
+    const [startHour, startMinute] = range.ranges[0].start.split(':').map(Number);
+    
+    setSelectedYear(year);
+    setSelectedMonth(month);
+    setSelectedDay(day);
+    setSelectedStartHour(startHour.toString());
+    setSelectedStartMinute(startMinute.toString());
+    
+    if (range.ranges[0].end !== "未指定") {
+      const [endHour, endMinute] = range.ranges[0].end.split(':').map(Number);
+      setSelectedEndHour(endHour.toString());
+      setSelectedEndMinute(endMinute.toString());
+    }
+    
+    setEditingIndex(index);
+    
+    // カレンダーも同期
+    handleDirectDateChange(year, month, day);
+  };
+
+  /**
+   * 保存された日程を削除
+   */
+  const handleDeleteDirectRange = (index) => {
+    setSavedDirectRanges(prev => prev.filter((_, i) => i !== index));
+    if (editingIndex === index) {
+      setEditingIndex(-1);
+      resetDirectInputForm();
+    }
+  };
+
+  /**
+   * 編集をキャンセル
+   */
+  const handleCancelEdit = () => {
+    setEditingIndex(-1);
+    resetDirectInputForm();
+  };
+
+  /**
+   * 表示用の時間範囲を取得（カレンダー選択 + 直接入力の保存済み）
    */
   const getDisplayTimeRanges = () => {
     const result = [];
@@ -287,15 +350,8 @@ const SchedulePage = () => {
       result.push(...getGroupedTimeRanges());
     }
     
-    // 直接指定を追加
-    const directRange = getDirectTimeRange();
-    if (directRange) {
-      // 同じ日付があるかチェック
-      const existingDates = result.map(item => item.date);
-      if (!existingDates.includes(directRange.date)) {
-        result.push(directRange);
-      }
-    }
+    // 直接入力の保存済みを追加
+    result.push(...savedDirectRanges);
     
     return result;
   };
@@ -304,9 +360,15 @@ const SchedulePage = () => {
    * 選択が完了しているか確認
    */
   const isSelectionComplete = () => {
-    // カレンダー選択があるか、または直接指定が完了しているか
-    return selectedTimeSlots.length > 0 || 
-           (selectedStartHour !== "--" && selectedStartMinute !== "--");
+    // カレンダー選択があるか、または直接入力の保存済みがあるか
+    return selectedTimeSlots.length > 0 || savedDirectRanges.length > 0;
+  };
+
+  /**
+   * 直接入力の保存ボタンが有効か確認
+   */
+  const canSaveDirectInput = () => {
+    return selectedStartHour !== "--" && selectedStartMinute !== "--";
   };
 
   /**
@@ -340,7 +402,6 @@ const SchedulePage = () => {
 
   /**
    * 送信ボタンがクリックされたときの処理
-   * カレンダー選択と直接指定の両方のデータを確認画面に送信
    */
   const handleSubmit = () => {
     if (isSelectionComplete()) {
@@ -361,16 +422,15 @@ const SchedulePage = () => {
   return (
     <div className="schedule-container">
       {/* 戻るボタン */}
-      {/* 戻るボタン */}
       <button className="back-button" onClick={handleBack}>
-        <span style={{ fontSize: '48px' }}>←</span>
+        <span style={{ fontSize: '36px' }}>←</span>
       </button>
 
       {/* インフォメーション */}
       <div className="schedule-info">
         <span className="info-icon">ⓘ</span>
         <p className="info-text">
-          カレンダーを押して日付と時間の指定ができます。連続する時間や別日も選択できます。
+          カレンダーを押して日付と時間の指定ができます。直接入力でも複数日程を選択できます。
         </p>
       </div>
 
@@ -395,9 +455,43 @@ const SchedulePage = () => {
       <div className="schedule-content">
         {/* 左側: 日付・時間直接指定 */}
         <div className="direct-selection-panel">
+          {/* 保存済み日程リスト */}
+          {savedDirectRanges.length > 0 && (
+            <div className="saved-ranges-box">
+              <h3 className="selection-title">📝 保存済み日程</h3>
+              <div className="saved-ranges-list">
+                {savedDirectRanges.map((range, index) => (
+                  <div key={index} className="saved-range-item">
+                    <div className="saved-range-info">
+                      <strong>{range.date}</strong>
+                      <span>{range.ranges[0].start} ～ {range.ranges[0].end}</span>
+                    </div>
+                    <div className="saved-range-actions">
+                      <button 
+                        className="edit-button" 
+                        onClick={() => handleEditDirectRange(index)}
+                      >
+                        編集
+                      </button>
+                      <button 
+                        className="delete-button" 
+                        onClick={() => handleDeleteDirectRange(index)}
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 日付を直接選択 */}
           <div className="selection-box">
-            <h3 className="selection-title">📅 日付を直接選択</h3>
+            <h3 className="selection-title">
+              📅 日付を選択
+              {editingIndex >= 0 && <span className="editing-badge">編集中</span>}
+            </h3>
             <div className="date-selectors">
               <div className="selector-group">
                 <select
@@ -463,20 +557,16 @@ const SchedulePage = () => {
               </div>
 
               <div className="day-of-week">
-                {getDayOfWeek(new Date(selectedYear, selectedMonth - 1, selectedDay))}曜日
+                {getDayOfWeek(new Date(selectedYear, selectedMonth - 1, selectedDay))}
               </div>
             </div>
-            <p className="note-text">日付の入力は必須です</p>
-            <p className="sub-note-text">
-              ※カレンダーから時間枠を選択すると自動で終了時刻も入力されます
-            </p>
           </div>
 
           {/* 時間を直接選択 */}
           <div className="selection-box">
-            <h3 className="selection-title">⏰ 時間を直接選択</h3>
+            <h3 className="selection-title">⏰ 時間を選択</h3>
             <div className="time-selectors">
-              {/* 開始時間の時 */}
+              {/* 開始時間 */}
               <div className="selector-group">
                 <select
                   className="time-select"
@@ -490,10 +580,9 @@ const SchedulePage = () => {
                     </option>
                   ))}
                 </select>
-                <span className="selector-label">時</span>
+                <span className="selector-label">:</span>
               </div>
 
-              {/* 開始時間の分 */}
               <div className="selector-group">
                 <select
                   className="time-select"
@@ -507,12 +596,11 @@ const SchedulePage = () => {
                     </option>
                   ))}
                 </select>
-                <span className="selector-label">分</span>
               </div>
 
               <span className="time-separator">〜</span>
 
-              {/* 終了時間の時 */}
+              {/* 終了時間 */}
               <div className="selector-group">
                 <select
                   className="time-select"
@@ -526,10 +614,9 @@ const SchedulePage = () => {
                     </option>
                   ))}
                 </select>
-                <span className="selector-label">時</span>
+                <span className="selector-label">:</span>
               </div>
 
-              {/* 終了時間の分 */}
               <div className="selector-group">
                 <select
                   className="time-select"
@@ -543,13 +630,24 @@ const SchedulePage = () => {
                     </option>
                   ))}
                 </select>
-                <span className="selector-label">分</span>
               </div>
             </div>
-            <p className="note-text error">カレンダーから選択すると自動入力されます</p>
-            <p className="sub-note-text">
-              ※予約可能時間: 1か月後までの月曜～日曜 9:00 - 23:00
-            </p>
+
+            {/* 保存ボタン */}
+            <div className="save-button-container">
+              <button
+                className={`save-direct-button ${canSaveDirectInput() ? 'active' : ''}`}
+                onClick={handleSaveDirectRange}
+                disabled={!canSaveDirectInput()}
+              >
+                {editingIndex >= 0 ? '更新' : '保存'}
+              </button>
+              {editingIndex >= 0 && (
+                <button className="cancel-edit-button" onClick={handleCancelEdit}>
+                  キャンセル
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -557,37 +655,33 @@ const SchedulePage = () => {
         <div className="calendar-selection-panel">
           <div className="calendar-box">
             <div className="calendar-header">
-              <h3 className="calendar-title">📅 カレンダーから日時選択</h3>
+              <h3 className="calendar-title">📅 カレンダーから選択</h3>
               <div className="calendar-navigation">
                 <button
                   className="nav-button"
                   onClick={() => changeCalendarWeek(-1)}
                 >
-                  前の週
+                  ◀ 前週
                 </button>
                 <span className="current-period">
-                  {`${calendarStartDate.getFullYear()}年${calendarStartDate.getMonth() + 1}月${calendarStartDate.getDate()}日～${new Date(new Date(calendarStartDate).setDate(calendarStartDate.getDate() + 6)).getFullYear()}年${new Date(new Date(calendarStartDate).setDate(calendarStartDate.getDate() + 6)).getMonth() + 1}月${new Date(new Date(calendarStartDate).setDate(calendarStartDate.getDate() + 6)).getDate()}日`}
+                  {calendarStartDate.getMonth() + 1}月{calendarStartDate.getDate()}日の週
                 </span>
                 <button
                   className="nav-button"
                   onClick={() => changeCalendarWeek(1)}
                 >
-                  次の週
+                  次週 ▶
                 </button>
               </div>
             </div>
 
-            <div className="calendar-instructions">
-              <p>30分枠をクリックで選択。連続する時間や別日も選択できます。</p>
-              <p>選択した枠をもう一度クリックすると解除できます。</p>
-            </div>
-
-            {/* カレンダーグリッド */}
-            <div className="calendar-grid">
-              {/* 曜日ヘッダー */}
-              <div className="calendar-row header-row">
-                <div className="time-header"></div>
-                {generateCalendarDays().map((date, index) => (
+            {/* カレンダーグリッド（横スクロール可能） */}
+            <div className="calendar-scroll-wrapper">
+              <div className="calendar-grid">
+                {/* 曜日ヘッダー */}
+                <div className="calendar-row header-row">
+                  <div className="time-header"></div>
+                  {generateCalendarDays().map((date, index) => (
                     <div key={index} className="day-header">
                       <div className="day-date">
                         {date.getMonth() + 1}/{date.getDate()}
@@ -597,15 +691,15 @@ const SchedulePage = () => {
                       </div>
                     </div>
                   ))}
-              </div>
+                </div>
 
-              {/* 時間スロット */}
-              {generateTimeSlots().map((slot, slotIndex) => (
-                <div key={slotIndex} className="calendar-row">
-                  <div className="time-label">
-                    {formatTime(slot.hour, slot.minute)}
-                  </div>
-                  {generateCalendarDays().map((date, dayIndex) => (
+                {/* 時間スロット */}
+                {generateTimeSlots().map((slot, slotIndex) => (
+                  <div key={slotIndex} className="calendar-row">
+                    <div className="time-label">
+                      {formatTime(slot.hour, slot.minute)}
+                    </div>
+                    {generateCalendarDays().map((date, dayIndex) => (
                       <button
                         key={dayIndex}
                         className={`time-slot ${
@@ -615,13 +709,12 @@ const SchedulePage = () => {
                         }`}
                         onClick={() => handleTimeSlotClick(date, slot.hour, slot.minute)}
                       >
-                        {isTimeSlotSelected(date, slot.hour, slot.minute)
-                          ? "選択中"
-                          : "選択"}
+                        {isTimeSlotSelected(date, slot.hour, slot.minute) ? "✓" : ""}
                       </button>
                     ))}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

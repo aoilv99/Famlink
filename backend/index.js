@@ -19,6 +19,9 @@ app.use('/api/families', familyRoutes); // /api/families/create, join, leave
 app.use('/api/messages', messageRoutes); // /api/messages/ (GET/POST)
 app.use('/api/schedules', scheduleRoutes); // /api/schedules/ (GET/POST)
 
+app.get('/', (req, res) => {
+  res.send('Backend is running');
+});
 
 const PORT = process.env.PORT || 3001;
 

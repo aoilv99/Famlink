@@ -5,8 +5,8 @@ const Message = require('../models/messageModel');
  */
 const messageService = {
   // メッセージ保存
-  postMessage: async (user_name, emotion, comment, family_id) => {
-    return await Message.create(user_name, emotion, comment, family_id);
+  postMessage: async (user_name, emotion, comment, family_id, user_id) => {
+    return await Message.create(user_name, emotion, comment, family_id, user_id);
   },
 
   // メッセージ履歴取得

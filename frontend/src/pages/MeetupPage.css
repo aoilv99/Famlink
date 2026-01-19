@@ -237,11 +237,12 @@ button.submit-button:active:not(.active) {
 
 @media (max-width: 768px) {
   .meetup-container {
-    padding: 30px 16px;
+    padding: 30px 30px; /* 16px → 30px */
   }
 
   .meetup-header {
     padding-top: 50px;
+    max-width: 85%; /* 新規追加 */
   }
 
   .meetup-title {
@@ -253,11 +254,14 @@ button.submit-button:active:not(.active) {
   }
 
   .options-grid {
-    gap: 16px;
+    gap: 18px; /* 16px → 18px */
+    max-width: 85%; /* 新規追加 */
+    margin-left: auto;
+    margin-right: auto;
   }
 
   button.option-card {
-    padding: 30px 16px;
+    padding: 32px 18px; /* 30px 16px → 32px 18px */
     min-height: 180px;
   }
 
@@ -273,6 +277,10 @@ button.submit-button:active:not(.active) {
   .option-subtitle {
     font-size: 13px;
   }
+
+  button.submit-button {
+    max-width: 85%; /* 新規追加 */
+  }
 }
 
 /* ========================================
@@ -281,7 +289,7 @@ button.submit-button:active:not(.active) {
 
 @media (max-width: 480px) {
   .meetup-container {
-    padding: 20px 12px;
+    padding: 20px 25px; /* 12px → 25px に変更 */
   }
 
   button.back-button {
@@ -293,44 +301,58 @@ button.submit-button:active:not(.active) {
   }
 
   .meetup-header {
-    margin-bottom: 30px;
+    margin-bottom: 35px; /* 30px → 35px */
+    max-width: 90%; /* 新規追加：横幅制限 */
   }
 
   .meetup-title {
     font-size: 24px;
+    margin-bottom: 12px; /* 8px → 12px */
   }
 
   .meetup-subtitle {
     font-size: 14px;
+    line-height: 1.6; /* 新規追加 */
   }
 
   .options-grid {
-    gap: 12px;
-    grid-template-columns: 1fr;
+    gap: 14px; /* 12px → 14px */
+    grid-template-columns: repeat(2, 1fr); /* 1列 → 2列に変更 */
+    max-width: 90%; /* 85% → 90% */
+    margin-left: auto;
+    margin-right: auto;
   }
 
   button.option-card {
-    padding: 24px 16px;
-    min-height: 160px;
+    padding: 28px 16px; /* 24px 16px → 28px 16px */
+    min-height: 160px; /* 160px → 160px */
+    border-width: 2px; /* 3px → 2px */
+  }
+
+  .option-icon {
+    margin-bottom: 12px; /* 20px → 12px */
   }
 
   .option-icon img {
-    width: 60px;
-    height: 60px;
+    width: 56px; /* 60px → 56px（2列なので少し小さく） */
+    height: 56px;
   }
 
   .option-title {
-    font-size: 16px;
+    font-size: 16px; /* 16px → 16px */
+    margin-bottom: 8px; /* 8px → 8px */
   }
 
   .option-subtitle {
-    font-size: 12px;
+    font-size: 12px; /* 12px → 12px */
+    line-height: 1.4; /* 新規追加 */
   }
 
   button.submit-button {
-    max-width: 100%;
-    height: 48px;
-    font-size: 16px;
+    max-width: 90%; /* 100% → 90% */
+    height: 52px; /* 48px → 52px */
+    font-size: 17px; /* 16px → 17px */
+    margin-top: 25px; /* 20px → 25px */
   }
 }
 

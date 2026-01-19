@@ -56,7 +56,8 @@ const initializeDatabase = async () => {
         emotion VARCHAR(20),
         comment TEXT,
         family_id VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id INT
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
@@ -78,6 +79,12 @@ const initializeDatabase = async () => {
     if (columns.length === 0) {
       await pool.query("ALTER TABLE users ADD COLUMN invite_code VARCHAR(20) UNIQUE");
       console.log('users テーブルに invite_code カラムを追加しました');
+    }
+
+    const [messages_user_id] = await pool.query("SHOW COLUMNS FROM messages LIKE 'user_id'");
+    if (messages_user_id.length === 0) {
+      await pool.query("ALTER TABLE messages ADD COLUMN user_id INT");
+      console.log('messages テーブルに user_id カラムを追加しました');
     }
 
     // テーブル一覧の表示（デバッグ用）

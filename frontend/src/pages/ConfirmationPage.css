@@ -308,7 +308,11 @@
 
 @media (max-width: 768px) {
   .confirmation-container {
-    padding: 30px 16px;
+    padding: 30px 30px; /* 16px → 30px */
+  }
+
+  .confirmation-header {
+    max-width: 85%; /* 新規追加 */
   }
 
   .confirmation-title {
@@ -317,6 +321,10 @@
 
   .confirmation-subtitle {
     font-size: 15px;
+  }
+
+  .confirmation-content {
+    max-width: 85%; /* 新規追加 */
   }
 
   .confirmation-section {
@@ -342,6 +350,7 @@
   .button-area {
     flex-direction: row;
     gap: 12px;
+    max-width: 85%; /* 新規追加 */
   }
 
   .confirmation-edit-button,
@@ -356,7 +365,7 @@
 
 @media (max-width: 480px) {
   .confirmation-container {
-    padding: 20px 12px;
+    padding: 20px 25px; /* 12px → 25px に変更 */
   }
 
   .back-button {
@@ -369,6 +378,7 @@
 
   .confirmation-header {
     margin-bottom: 30px;
+    max-width: 90%; /* 新規追加 */
   }
 
   .confirmation-title {
@@ -379,17 +389,23 @@
     font-size: 14px;
   }
 
+  .confirmation-content {
+    max-width: 90%; /* 新規追加 */
+    gap: 20px; /* 24px → 20px */
+  }
+
   .confirmation-section {
-    padding: 16px;
+    padding: 18px; /* 16px → 18px */
   }
 
   .section-title {
     font-size: 15px;
+    margin-bottom: 16px; /* 20px → 16px */
   }
 
   .meetup-type-display {
-    padding: 12px;
-    gap: 12px;
+    padding: 14px; /* 12px → 14px */
+    gap: 14px; /* 12px → 14px */
   }
 
   .meetup-emoji {
@@ -400,16 +416,26 @@
     font-size: 16px;
   }
 
+  .time-ranges-list {
+    gap: 14px; /* 16px → 14px */
+  }
+
   .time-range-item {
-    padding: 12px;
+    padding: 14px; /* 12px → 14px */
   }
 
   .date-label {
     font-size: 16px;
+    margin-bottom: 10px; /* 12px → 10px */
+    padding-bottom: 6px; /* 8px → 6px */
+  }
+
+  .ranges-wrapper {
+    gap: 6px; /* 8px → 6px */
   }
 
   .time-range-display {
-    padding: 10px 12px;
+    padding: 10px 14px; /* 10px 12px → 10px 14px */
     font-size: 14px;
   }
 
@@ -428,6 +454,11 @@
 
   .notice-list li {
     font-size: 13px;
+  }
+
+  .button-area {
+    max-width: 90%; /* 新規追加 */
+    gap: 10px; /* 16px → 10px */
   }
 
   .confirmation-edit-button,
