@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "mock": "node backend/mocks/server.js",
-    "start": "vite preview --host 0.0.0.0 --port $PORT"
+    "start": "vite preview --host 0.0.0.0 --port 5173"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
