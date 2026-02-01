@@ -5,8 +5,14 @@ const db = require('../config/db');
 const scheduleResponseService = {
   // 回答を保存
   saveResponse: async (schedule_id, user_id, user_name, selected_time_slots) => {
-    if (!schedule_id || !user_id || !selected_time_slots) {
+    if (!schedule_id || !user_id || selected_time_slots === undefined || selected_time_slots === null) {
       throw new Error('必須項目が不足しています');
+    }
+
+    // 既に回答済みかチェック
+    const hasResponded = await ScheduleResponse.hasUserResponded(schedule_id, user_id);
+    if (hasResponded) {
+      throw new Error('既に回答済みです');
     }
 
     // 回答を保存

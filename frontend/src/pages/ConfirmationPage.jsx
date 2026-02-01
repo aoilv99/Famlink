@@ -36,13 +36,13 @@ const ConfirmationPage = () => {
 
     try {
       // ユーザー名を取得するために API を叩く
-      const userResponse = await fetch(`http://127.0.0.1:3001/api/users/${email}`);
+      const userResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/users/${email}`);
       const userData = await userResponse.json();
       const senderName = userData.user_name || email.split('@')[0];
       const senderId = userData.id;
 
       // スケジュールを保存
-      const response = await fetch('http://127.0.0.1:3001/api/schedules', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/schedules`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

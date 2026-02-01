@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import "./NotificationDrawer.css";
+import TimeRangeSlider from "./TimeRangeSlider";
 import scheduleIcon from "../assets/calendar.png";
 import happyIcon from "../assets/happy.png";
 import sadIcon from "../assets/sad.png";
@@ -24,6 +25,15 @@ const NotificationDrawer = ({
 }) => {
   const notifications = externalNotifications;
   const [selectedTimeSlots, setSelectedTimeSlots] = useState({});
+  const [respondedSchedules, setRespondedSchedules] = useState(() => {
+    // localStorageから送信済みスケジュールIDを取得
+    const stored = localStorage.getItem('respondedSchedules');
+    return stored ? JSON.parse(stored) : [];
+  });
+  // 時間調整モードの管理
+  const [adjustmentMode, setAdjustmentMode] = useState({});
+  // 調整された時間範囲の管理
+  const [adjustedTimeSlots, setAdjustedTimeSlots] = useState({});
 
   const getEmotionIcon = (emotion) => {
     return emotionIcons[emotion] || normalIcon;
@@ -52,6 +62,82 @@ const NotificationDrawer = ({
     }));
   };
 
+  const toggleAdjustmentMode = (notificationId, dateIndex, slotIndex) => {
+    const key = `${notificationId}__${dateIndex}__${slotIndex}`;
+    setAdjustmentMode((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+    // 調整モードを有効にした時に自動的に選択状態にする
+    if (!adjustmentMode[key]) {
+      setSelectedTimeSlots((prev) => ({
+        ...prev,
+        [key]: true,
+      }));
+    }
+  };
+
+  const handleTimeRangeChange = (notificationId, dateIndex, slotIndex, { startTime, endTime }) => {
+    const key = `${notificationId}__${dateIndex}__${slotIndex}`;
+    setAdjustedTimeSlots((prev) => ({
+      ...prev,
+      [key]: { startTime, endTime },
+    }));
+  };
+
+  const handleRespondNoAvailability = async (notificationId) => {
+    // 「行ける日がない」で送信
+    const email = localStorage.getItem("authToken");
+    const userId = localStorage.getItem("userId");
+
+    if (!window.confirm("全ての日程が都合悪いことを送信しますか？")) {
+      return;
+    }
+
+    try {
+      const userResponse = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/${email}`,
+      );
+      const userData = await userResponse.json();
+
+      const scheduleId = notificationId.replace("schedule-", "");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/schedules/${scheduleId}/responses`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: userId,
+            user_name: userData.user_name,
+            selected_time_slots: [],
+          }),
+        },
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+
+        // 送信済みスケジュールに追加
+        const newRespondedSchedules = [...respondedSchedules, scheduleId];
+        setRespondedSchedules(newRespondedSchedules);
+        localStorage.setItem('respondedSchedules', JSON.stringify(newRespondedSchedules));
+
+        if (result.isComplete) {
+          alert("回答を送信しました！\n全員の回答が揃いました！");
+        } else {
+          alert("回答を送信しました！");
+        }
+      } else {
+        const errorData = await response.json();
+        alert("送信に失敗しました: " + errorData.message);
+      }
+    } catch (error) {
+      console.error("回答送信エラー:", error);
+      alert("サーバーに接続できませんでした");
+    }
+  };
+
   const handleRespond = async (notificationId) => {
     const selected = Object.keys(selectedTimeSlots).filter(
       (key) => key.startsWith(notificationId) && selectedTimeSlots[key],
@@ -68,11 +154,15 @@ const NotificationDrawer = ({
       const dateIdx = parts[parts.length - 2];
       const slotIdx = parts[parts.length - 1];
       const date = notification.data.preferredDates[dateIdx];
+
+      // 調整された時間範囲があればそれを使用、なければ元の時間を使用
+      const adjustedTime = adjustedTimeSlots[key];
       const slot = date.timeSlots[slotIdx];
+
       return {
         date: date.date,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
+        startTime: adjustedTime ? adjustedTime.startTime : slot.startTime,
+        endTime: adjustedTime ? adjustedTime.endTime : slot.endTime,
       };
     });
 
@@ -82,7 +172,7 @@ const NotificationDrawer = ({
 
     try {
       const userResponse = await fetch(
-        `http://127.0.0.1:3001/api/users/${email}`,
+        `${import.meta.env.VITE_API_URL}/api/users/${email}`,
       );
       const userData = await userResponse.json();
 
@@ -91,7 +181,7 @@ const NotificationDrawer = ({
 
       // 回答を送信
       const response = await fetch(
-        `http://127.0.0.1:3001/api/schedules/${scheduleId}/responses`,
+        `${import.meta.env.VITE_API_URL}/api/schedules/${scheduleId}/responses`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -105,19 +195,31 @@ const NotificationDrawer = ({
 
       if (response.ok) {
         const result = await response.json();
-        alert("日程を送信しました！");
 
         // 選択状態をクリア
         const clearedSlots = { ...selectedTimeSlots };
+        const clearedAdjusted = { ...adjustedTimeSlots };
+        const clearedMode = { ...adjustmentMode };
         Object.keys(clearedSlots).forEach((key) => {
           if (key.startsWith(notificationId)) {
             delete clearedSlots[key];
+            delete clearedAdjusted[key];
+            delete clearedMode[key];
           }
         });
         setSelectedTimeSlots(clearedSlots);
+        setAdjustedTimeSlots(clearedAdjusted);
+        setAdjustmentMode(clearedMode);
+
+        // 送信済みスケジュールに追加
+        const newRespondedSchedules = [...respondedSchedules, scheduleId];
+        setRespondedSchedules(newRespondedSchedules);
+        localStorage.setItem('respondedSchedules', JSON.stringify(newRespondedSchedules));
 
         if (result.isComplete) {
-          alert("全員の回答が揃いました！送信者に通知されます。");
+          alert("日程を送信しました！\n全員の回答が揃いました！");
+        } else {
+          alert("日程を送信しました！");
         }
       } else {
         const errorData = await response.json();
@@ -171,6 +273,10 @@ const NotificationDrawer = ({
         (key) => key.startsWith(notification.id) && selectedTimeSlots[key],
       );
 
+      // 送信済みかチェック（notificationIdは "schedule-123" の形式）
+      const scheduleId = notification.id.replace('schedule-', '');
+      const isResponded = respondedSchedules.includes(scheduleId);
+
       return (
         <div
           key={notification.id}
@@ -205,52 +311,108 @@ const NotificationDrawer = ({
                         <p className="date-header">{dateSlot.date}</p>
                         {dateSlot.timeSlots &&
                           dateSlot.timeSlots.map((timeSlot, slotIndex) => {
-                            const slotKey = `${notification.id}-${dateIndex}-${slotIndex}`;
+                            const slotKey = `${notification.id}__${dateIndex}__${slotIndex}`;
                             const isSelected = selectedTimeSlots[slotKey];
+                            const isAdjustMode = adjustmentMode[slotKey];
                             return (
-                              <button
-                                key={slotIndex}
-                                className={`time-slot-button ${isSelected ? "selected" : ""}`}
-                                onClick={() =>
-                                  toggleTimeSlot(
-                                    notification.id,
-                                    dateIndex,
-                                    slotIndex,
-                                  )
-                                }
-                                style={{
-                                  borderColor: isSelected
-                                    ? "#a52a44"
-                                    : "#e0e0e0",
-                                  backgroundColor: isSelected
-                                    ? "#a52a44"
-                                    : "#ffffff",
-                                  color: isSelected ? "#ffffff" : "#424242",
-                                }}
-                              >
-                                <span className="time-slot-icon">
-                                  {isSelected ? "✓" : "○"}
-                                </span>
-                                {formatTimeSlot(timeSlot)}
-                              </button>
+                              <div key={slotIndex} style={{ marginBottom: "8px" }}>
+                                {!isAdjustMode ? (
+                                  <button
+                                    className={`time-slot-button ${isSelected ? "selected" : ""}`}
+                                    onClick={() =>
+                                      toggleTimeSlot(
+                                        notification.id,
+                                        dateIndex,
+                                        slotIndex,
+                                      )
+                                    }
+                                    style={{
+                                      borderColor: isSelected
+                                        ? "#a52a44"
+                                        : "#e0e0e0",
+                                      backgroundColor: isSelected
+                                        ? "#a52a44"
+                                        : "#ffffff",
+                                      color: isSelected ? "#ffffff" : "#424242",
+                                    }}
+                                  >
+                                    <span className="time-slot-icon">
+                                      {isSelected ? "✓" : "○"}
+                                    </span>
+                                    {formatTimeSlot(timeSlot)}
+                                  </button>
+                                ) : (
+                                  <TimeRangeSlider
+                                    originalStart={timeSlot.startTime}
+                                    originalEnd={timeSlot.endTime}
+                                    onRangeChange={(range) =>
+                                      handleTimeRangeChange(
+                                        notification.id,
+                                        dateIndex,
+                                        slotIndex,
+                                        range,
+                                      )
+                                    }
+                                    disabled={isResponded}
+                                  />
+                                )}
+                                {!isResponded && (
+                                  <button
+                                    onClick={() =>
+                                      toggleAdjustmentMode(
+                                        notification.id,
+                                        dateIndex,
+                                        slotIndex,
+                                      )
+                                    }
+                                    style={{
+                                      marginLeft: "8px",
+                                      padding: "4px 8px",
+                                      fontSize: "12px",
+                                      backgroundColor: isAdjustMode ? "#6c757d" : "#f0f0f0",
+                                      color: isAdjustMode ? "#ffffff" : "#424242",
+                                      border: "1px solid #ddd",
+                                      borderRadius: "4px",
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {isAdjustMode ? "全体選択に戻す" : "時間を調整"}
+                                  </button>
+                                )}
+                              </div>
                             );
                           })}
                       </div>
                     ),
                   )}
                   <button
-                    className={`respond-button ${hasSelection ? "active" : ""}`}
+                    className={`respond-button ${hasSelection && !isResponded ? "active" : ""}`}
                     onClick={() => handleRespond(notification.id)}
-                    disabled={!hasSelection}
+                    disabled={!hasSelection || isResponded}
                     style={{
-                      backgroundColor: hasSelection ? "#a52a44" : "#cccccc",
+                      backgroundColor: isResponded ? "#999999" : (hasSelection ? "#a52a44" : "#cccccc"),
                       color: "#ffffff",
                     }}
                   >
-                    {hasSelection
-                      ? "選択した日程で返信"
-                      : "日程を選択してください"}
+                    {isResponded
+                      ? "送信済み ✓"
+                      : (hasSelection
+                        ? "選択した日程で返信"
+                        : "日程を選択してください")}
                   </button>
+                  {!isResponded && (
+                    <button
+                      className="respond-button no-availability-button"
+                      onClick={() => handleRespondNoAvailability(notification.id)}
+                      style={{
+                        backgroundColor: "#6c757d",
+                        color: "#ffffff",
+                        marginTop: "8px",
+                      }}
+                    >
+                      行ける日がない
+                    </button>
+                  )}
                 </div>
               )}
           </div>
@@ -288,12 +450,17 @@ const NotificationDrawer = ({
                       <p className="user-name-display">
                         👤 {response.user_name}さん
                       </p>
-                      {response.slots &&
+                      {response.slots && response.slots.length > 0 ? (
                         response.slots.map((slot, slotIdx) => (
                           <div key={slotIdx} className="time-slot-display">
                             📅 {slot.date} {slot.startTime} 〜 {slot.endTime}
                           </div>
-                        ))}
+                        ))
+                      ) : (
+                        <div className="time-slot-display" style={{ borderLeftColor: "#6c757d" }}>
+                          ❌ 行ける日がない
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

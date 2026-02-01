@@ -59,7 +59,7 @@ const InviteFamilyScreen = () => {
     try {
       console.log("familyscreen+60");
       const response = await fetch(
-        "http://127.0.0.1:3001/api/families/create",
+        `${import.meta.env.VITE_API_URL}/api/families/create`,
         {
           method: "POST",
           headers: {"Content-Type": "application/json"},

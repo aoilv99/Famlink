@@ -29,22 +29,17 @@ const useNotificationStore = create((set, get) => ({
 
     try {
       const cacheBuster = `_=${new Date().getTime()}`;
-      const scheduleApiUrl = `http://127.0.0.1:3001/api/schedules/${familyId}?${cacheBuster}`;
-      const messageApiUrl = `http://127.0.0.1:3001/api/messages/${familyId}?${cacheBuster}`;
+      const notificationApiUrl = `${import.meta.env.VITE_API_URL}/api/notifications/${familyId}?${cacheBuster}`;
 
-      const [scheduleRes, messageRes] = await Promise.all([
-        fetch(scheduleApiUrl),
-        fetch(messageApiUrl),
-      ]);
+      const response = await fetch(notificationApiUrl);
 
-      if (!scheduleRes.ok || !messageRes.ok) {
+      if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
 
-      const schedules = await scheduleRes.json();
-      const messages = await messageRes.json();
+      const { schedules, messages } = await response.json();
 
-      console.log(schedules);
+      console.log('Notifications:', { schedules, messages });
 
       // 現在のユーザーIDを取得
       const currentUserId = localStorage.getItem('userId');
@@ -52,11 +47,12 @@ const useNotificationStore = create((set, get) => ({
       // スケジュール通知を作成
       const scheduleNotifications = schedules
         .filter((schedule) => {
-          // 完了したスケジュールは送信者にも表示、それ以外は自分が送ったものを除外
-          if (schedule.status === 'completed' && String(schedule.sender_id) === String(currentUserId)) {
-            return true; // 完了した自分のスケジュールは表示
+          // 完了したスケジュールは全員に表示
+          if (schedule.status === 'completed') {
+            return true;
           }
-          return String(schedule.sender_id) !== String(currentUserId); // 他人のスケジュールは表示
+          // それ以外は自分が送ったものを除外
+          return String(schedule.sender_id) !== String(currentUserId);
         })
         .map((schedule) => {
           // time_rangesをパース（JSON文字列の場合）
@@ -70,8 +66,8 @@ const useNotificationStore = create((set, get) => ({
             }
           }
 
-          // 完了したスケジュールの場合
-          if (schedule.status === 'completed' && String(schedule.sender_id) === String(currentUserId)) {
+          // 完了したスケジュールの場合（送信者も参加者も同じ表示）
+          if (schedule.status === 'completed') {
             let finalSchedule = schedule.final_schedule;
             if (typeof finalSchedule === "string") {
               try {
@@ -97,21 +93,43 @@ const useNotificationStore = create((set, get) => ({
             };
           }
 
+          // 絞り込まれた候補があればそれを使用、なければ元の候補を使用
+          let displayTimeRanges = timeRanges;
+          let hasFiltered = false;
+
+          if (schedule.filtered_time_ranges) {
+            let filteredRanges = schedule.filtered_time_ranges;
+            if (typeof filteredRanges === "string") {
+              try {
+                filteredRanges = JSON.parse(filteredRanges);
+              } catch (e) {
+                console.error("JSON parse error:", e);
+                filteredRanges = null;
+              }
+            }
+
+            if (filteredRanges && filteredRanges.length > 0) {
+              displayTimeRanges = filteredRanges;
+              hasFiltered = true;
+            }
+          }
+
           // 通常のスケジュール（回答待ち）
           return {
             id: `schedule-${schedule.id}`,
             type: "meetingRequest",
-            title: `${schedule.sender_name}さんから会う提案`,
+            title: `${schedule.sender_name}さんから会う提案${hasFiltered ? ' (絞り込み済み)' : ''}`,
             data: {
               purpose: getMeetupTypeText(schedule.meetup_type),
-              preferredDates: timeRanges.map((timeRange) => ({
+              preferredDates: displayTimeRanges.map((timeRange) => ({
                 date: timeRange.date,
                 timeSlots: timeRange.ranges.map((range) => ({
-                  startTime: range.start,
-                  endTime: range.end,
+                  startTime: range.start || range.startTime,
+                  endTime: range.end || range.endTime,
                 })),
               })),
               requesterName: schedule.sender_name,
+              responseCount: schedule.response_count || 0,
             },
             createdAt: new Date(schedule.created_at),
             isRead: schedule.is_read || false,

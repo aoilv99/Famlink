@@ -43,9 +43,10 @@ const HomePage = ({onLogout}) => {
       const email = localStorage.getItem("authToken");
       if (!email) return;
       try {
-        const response = await fetch(
-          `http://127.0.0.1:3001/api/users/${email}`,
-        );
+        const apiUrl = `${import.meta.env.VITE_API_URL}/api/users/${email}`;
+        console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+        console.log('Fetching:', apiUrl);
+        const response = await fetch(apiUrl);
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
@@ -135,7 +136,7 @@ const HomePage = ({onLogout}) => {
       user_id: userData.id,
     };
     try {
-      const response = await fetch("http://127.0.0.1:3001/api/messages", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/messages`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(postData),
@@ -178,7 +179,7 @@ const HomePage = ({onLogout}) => {
     const email = localStorage.getItem("authToken");
     if (email) {
       try {
-        await fetch("http://127.0.0.1:3001/api/families/leave", {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/families/leave`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify({email}),

@@ -33,7 +33,7 @@ const RegisterScreen = ({ onRegisterSuccess, onBackToAuth }) => {
     }
     
     try {
-      const response = await fetch('http://127.0.0.1:3001/api/register', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, user_name: email.split('@')[0] }) // ユーザー名は一旦メールの一部に
