@@ -48,8 +48,12 @@ const useNotificationStore = create((set, get) => ({
       const scheduleNotifications = schedules
         .filter((schedule) => {
           // 完了したスケジュールは全員に表示
-          if (schedule.status === 'completed') {
+          if (schedule.status === 'completed' || schedule.status === 'auto_decided' || schedule.status === 'no_common_time') {
             return true;
+          }
+          // pending_selectionは送信者（親）にのみ表示
+          if (schedule.status === 'pending_selection') {
+            return String(schedule.sender_id) === String(currentUserId);
           }
           // それ以外は自分が送ったものを除外
           return String(schedule.sender_id) !== String(currentUserId);
@@ -66,8 +70,68 @@ const useNotificationStore = create((set, get) => ({
             }
           }
 
+          // 親が選択する必要がある場合
+          if (schedule.status === 'pending_selection') {
+            let commonSlots = schedule.common_slots;
+            if (typeof commonSlots === "string") {
+              try {
+                commonSlots = JSON.parse(commonSlots);
+              } catch (e) {
+                console.error("JSON parse error:", e);
+                commonSlots = [];
+              }
+            }
+
+            return {
+              id: `schedule-${schedule.id}`,
+              type: "pendingSelection",
+              title: `日程を選択してください`,
+              data: {
+                purpose: getMeetupTypeText(schedule.meetup_type),
+                commonSlots: commonSlots,
+                requesterName: schedule.sender_name,
+              },
+              createdAt: new Date(schedule.created_at),
+              isRead: schedule.is_read || false,
+              sender: schedule.sender_name,
+            };
+          }
+
           // 完了したスケジュールの場合（送信者も参加者も同じ表示）
-          if (schedule.status === 'completed') {
+          if (schedule.status === 'completed' || schedule.status === 'auto_decided') {
+            let finalSchedule = schedule.final_schedule;
+            if (typeof finalSchedule === "string") {
+              try {
+                finalSchedule = JSON.parse(finalSchedule);
+              } catch (e) {
+                console.error("JSON parse error:", e);
+                finalSchedule = [];
+              }
+            }
+
+            const isAutoDecided = schedule.status === 'auto_decided';
+            const title = isAutoDecided
+              ? `日程が自動決定されました！`
+              : `日程が決まりました！`;
+
+            return {
+              id: `schedule-final-${schedule.id}`,
+              type: "scheduleFinal",
+              title: title,
+              data: {
+                purpose: getMeetupTypeText(schedule.meetup_type),
+                finalSchedule: finalSchedule,
+                requesterName: schedule.sender_name,
+                autoDecided: isAutoDecided,
+              },
+              createdAt: new Date(schedule.created_at),
+              isRead: schedule.is_read || false,
+              sender: schedule.sender_name,
+            };
+          }
+
+          // 共通時間がない場合
+          if (schedule.status === 'no_common_time') {
             let finalSchedule = schedule.final_schedule;
             if (typeof finalSchedule === "string") {
               try {
@@ -81,11 +145,12 @@ const useNotificationStore = create((set, get) => ({
             return {
               id: `schedule-final-${schedule.id}`,
               type: "scheduleFinal",
-              title: `日程が決まりました！`,
+              title: `共通の時間がありませんでした`,
               data: {
                 purpose: getMeetupTypeText(schedule.meetup_type),
                 finalSchedule: finalSchedule,
                 requesterName: schedule.sender_name,
+                noCommonTime: true,
               },
               createdAt: new Date(schedule.created_at),
               isRead: schedule.is_read || false,

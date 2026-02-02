@@ -12,4 +12,7 @@ router.post('/:schedule_id/responses', scheduleResponseController.saveResponse);
 router.get('/:schedule_id/responses', scheduleResponseController.getResponses);
 router.get('/:schedule_id/final', scheduleResponseController.getFinalSchedule);
 
+// 親が最終日程を選択
+router.post('/:schedule_id/select', scheduleController.selectFinalSlot);
+
 module.exports = router;

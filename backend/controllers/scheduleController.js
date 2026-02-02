@@ -28,6 +28,21 @@ const scheduleController = {
       console.error('スケジュール取得エラー:', err.message);
       res.status(500).json({ message: err.message });
     }
+  },
+
+  // 親が最終日程を選択
+  selectFinalSlot: async (req, res) => {
+    const { schedule_id } = req.params;
+    const { selected_slot, user_id } = req.body;
+    console.log(`API Request: POST /api/schedules/${schedule_id}/select`, req.body);
+
+    try {
+      const result = await scheduleService.selectFinalSlot(schedule_id, selected_slot, user_id);
+      res.json({ message: '日程を確定しました', result });
+    } catch (err) {
+      console.error('日程確定エラー:', err.message);
+      res.status(500).json({ message: err.message });
+    }
   }
 };
 

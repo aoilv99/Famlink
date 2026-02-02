@@ -64,6 +64,29 @@ const Schedule = {
     );
     return result;
   },
+
+  // 共通時間帯を保存
+  updateCommonSlots: async (id, common_slots) => {
+    const [result] = await db.execute(
+      "UPDATE schedules SET common_slots = ? WHERE id = ?",
+      [JSON.stringify(common_slots), id],
+    );
+    return result;
+  },
+
+  // 親が選択した日程を保存
+  selectFinalSlot: async (id, selected_slot) => {
+    const finalSchedule = {
+      selectedSlot: selected_slot,
+      selectedBy: 'parent',
+      selectedAt: new Date().toISOString()
+    };
+    const [result] = await db.execute(
+      "UPDATE schedules SET status = 'completed', final_schedule = ? WHERE id = ?",
+      [JSON.stringify(finalSchedule), id],
+    );
+    return result;
+  },
 };
 
 module.exports = Schedule;

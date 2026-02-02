@@ -56,21 +56,17 @@ const NotificationDrawer = ({
 
   const toggleTimeSlot = (notificationId, dateIndex, slotIndex) => {
     const key = `${notificationId}__${dateIndex}__${slotIndex}`;
+    const isCurrentlySelected = selectedTimeSlots[key];
+
+    // 選択状態を切り替え
     setSelectedTimeSlots((prev) => ({
       ...prev,
       [key]: !prev[key],
     }));
-  };
 
-  const toggleAdjustmentMode = (notificationId, dateIndex, slotIndex) => {
-    const key = `${notificationId}__${dateIndex}__${slotIndex}`;
-    setAdjustmentMode((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-    // 調整モードを有効にした時に自動的に選択状態にする
-    if (!adjustmentMode[key]) {
-      setSelectedTimeSlots((prev) => ({
+    // クリックで選択した時は自動的に調整モードにする
+    if (!isCurrentlySelected) {
+      setAdjustmentMode((prev) => ({
         ...prev,
         [key]: true,
       }));
@@ -231,6 +227,40 @@ const NotificationDrawer = ({
     }
   };
 
+  const handleSelectFinalSlot = async (notificationId, slot) => {
+    const userId = localStorage.getItem("userId");
+    const scheduleId = notificationId.replace("schedule-", "");
+
+    if (!window.confirm(`この日程で決定しますか？\n${slot.date} ${slot.startTime} 〜 ${slot.endTime}`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/schedules/${scheduleId}/select`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            selected_slot: slot,
+            user_id: userId,
+          }),
+        },
+      );
+
+      if (response.ok) {
+        alert("日程を確定しました！");
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        alert("確定に失敗しました: " + errorData.message);
+      }
+    } catch (error) {
+      console.error("日程確定エラー:", error);
+      alert("サーバーに接続できませんでした");
+    }
+  };
+
   const renderNotificationItem = (notification) => {
     const timeAgo = formatDistanceToNow(notification.createdAt, {
       addSuffix: true,
@@ -314,18 +344,24 @@ const NotificationDrawer = ({
                             const slotKey = `${notification.id}__${dateIndex}__${slotIndex}`;
                             const isSelected = selectedTimeSlots[slotKey];
                             const isAdjustMode = adjustmentMode[slotKey];
+                            const adjustedTime = adjustedTimeSlots[slotKey];
+
+                            // 表示する時間（調整済みがあればそれを、なければ元の時間）
+                            const displayTime = adjustedTime || timeSlot;
+
                             return (
                               <div key={slotIndex} style={{ marginBottom: "8px" }}>
                                 {!isAdjustMode ? (
                                   <button
                                     className={`time-slot-button ${isSelected ? "selected" : ""}`}
                                     onClick={() =>
-                                      toggleTimeSlot(
+                                      !isResponded && toggleTimeSlot(
                                         notification.id,
                                         dateIndex,
                                         slotIndex,
                                       )
                                     }
+                                    disabled={isResponded}
                                     style={{
                                       borderColor: isSelected
                                         ? "#a52a44"
@@ -334,50 +370,55 @@ const NotificationDrawer = ({
                                         ? "#a52a44"
                                         : "#ffffff",
                                       color: isSelected ? "#ffffff" : "#424242",
+                                      cursor: isResponded ? "not-allowed" : "pointer",
+                                      opacity: isResponded ? 0.6 : 1,
                                     }}
                                   >
                                     <span className="time-slot-icon">
                                       {isSelected ? "✓" : "○"}
                                     </span>
-                                    {formatTimeSlot(timeSlot)}
+                                    {formatTimeSlot(displayTime)}
                                   </button>
                                 ) : (
-                                  <TimeRangeSlider
-                                    originalStart={timeSlot.startTime}
-                                    originalEnd={timeSlot.endTime}
-                                    onRangeChange={(range) =>
-                                      handleTimeRangeChange(
-                                        notification.id,
-                                        dateIndex,
-                                        slotIndex,
-                                        range,
-                                      )
-                                    }
-                                    disabled={isResponded}
-                                  />
-                                )}
-                                {!isResponded && (
-                                  <button
-                                    onClick={() =>
-                                      toggleAdjustmentMode(
-                                        notification.id,
-                                        dateIndex,
-                                        slotIndex,
-                                      )
-                                    }
-                                    style={{
-                                      marginLeft: "8px",
-                                      padding: "4px 8px",
-                                      fontSize: "12px",
-                                      backgroundColor: isAdjustMode ? "#6c757d" : "#f0f0f0",
-                                      color: isAdjustMode ? "#ffffff" : "#424242",
-                                      border: "1px solid #ddd",
-                                      borderRadius: "4px",
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    {isAdjustMode ? "全体選択に戻す" : "時間を調整"}
-                                  </button>
+                                  <div>
+                                    <TimeRangeSlider
+                                      originalStart={timeSlot.startTime}
+                                      originalEnd={timeSlot.endTime}
+                                      onRangeChange={(range) =>
+                                        handleTimeRangeChange(
+                                          notification.id,
+                                          dateIndex,
+                                          slotIndex,
+                                          range,
+                                        )
+                                      }
+                                      disabled={isResponded}
+                                    />
+                                    {!isResponded && (
+                                      <button
+                                        onClick={() => {
+                                          const key = `${notification.id}__${dateIndex}__${slotIndex}`;
+                                          setAdjustmentMode((prev) => ({
+                                            ...prev,
+                                            [key]: false,
+                                          }));
+                                        }}
+                                        style={{
+                                          width: "100%",
+                                          padding: "6px 12px",
+                                          fontSize: "13px",
+                                          backgroundColor: "#f0f0f0",
+                                          color: "#424242",
+                                          border: "1px solid #ddd",
+                                          borderRadius: "4px",
+                                          cursor: "pointer",
+                                          marginTop: "4px",
+                                        }}
+                                      >
+                                        ✓ 時間を確定
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             );
@@ -420,7 +461,7 @@ const NotificationDrawer = ({
       );
     }
 
-    if (notification.type === "scheduleFinal") {
+    if (notification.type === "pendingSelection") {
       return (
         <div
           key={notification.id}
@@ -429,7 +470,7 @@ const NotificationDrawer = ({
             borderTop: `1px solid ${senderColors.accent}`,
           }}
         >
-          <div className="notification-emoji-icon">✅</div>
+          <div className="notification-emoji-icon">🎯</div>
           <div className="notification-content">
             <div className="notification-header">
               <p className="notification-title">{notification.title}</p>
@@ -441,10 +482,79 @@ const NotificationDrawer = ({
               <div className="purpose-text">{notification.data.purpose}</div>
             </div>
 
-            {notification.data.finalSchedule &&
+            {notification.data.commonSlots &&
+              notification.data.commonSlots.length > 0 && (
+                <div className="notification-section">
+                  <p className="notification-label">
+                    📆 全員が都合の良い時間帯（以下から1つ選択してください）
+                  </p>
+                  {notification.data.commonSlots.map((slot, idx) => (
+                    <button
+                      key={idx}
+                      className="time-slot-button selectable"
+                      onClick={() => handleSelectFinalSlot(notification.id, slot)}
+                      style={{
+                        borderColor: "#a52a44",
+                        backgroundColor: "#ffffff",
+                        color: "#424242",
+                        marginBottom: "8px",
+                        width: "100%",
+                      }}
+                    >
+                      <span className="time-slot-icon">📅</span>
+                      {slot.date} {slot.startTime} 〜 {slot.endTime}
+                    </button>
+                  ))}
+                </div>
+              )}
+          </div>
+        </div>
+      );
+    }
+
+    if (notification.type === "scheduleFinal") {
+      const isAutoDecided = notification.data.autoDecided;
+      const noCommonTime = notification.data.noCommonTime;
+
+      return (
+        <div
+          key={notification.id}
+          className={`notification-item meeting-request ${!notification.isRead ? "unread" : ""}`}
+          style={{
+            borderTop: `1px solid ${senderColors.accent}`,
+          }}
+        >
+          <div className="notification-emoji-icon">
+            {isAutoDecided ? "🎉" : noCommonTime ? "😢" : "✅"}
+          </div>
+          <div className="notification-content">
+            <div className="notification-header">
+              <p className="notification-title">{notification.title}</p>
+              <span className="notification-time">{timeAgo}</span>
+            </div>
+
+            <div className="notification-section">
+              <p className="notification-label">💬 会いたい内容</p>
+              <div className="purpose-text">{notification.data.purpose}</div>
+            </div>
+
+            {isAutoDecided && notification.data.finalSchedule?.selectedSlot && (
+              <div className="notification-section">
+                <p className="notification-label">📆 決定した日程</p>
+                <div className="time-slot-display" style={{ borderLeftColor: "#a52a44" }}>
+                  📅 {notification.data.finalSchedule.selectedSlot.date}{" "}
+                  {notification.data.finalSchedule.selectedSlot.startTime} 〜{" "}
+                  {notification.data.finalSchedule.selectedSlot.endTime}
+                </div>
+              </div>
+            )}
+
+            {!isAutoDecided && notification.data.finalSchedule &&
               notification.data.finalSchedule.length > 0 && (
                 <div className="notification-section">
-                  <p className="notification-label">📆 みんなが選んだ日程</p>
+                  <p className="notification-label">
+                    {noCommonTime ? "📆 みんなの回答" : "📆 みんなが選んだ日程"}
+                  </p>
                   {notification.data.finalSchedule.map((response, idx) => (
                     <div key={idx}>
                       <p className="user-name-display">

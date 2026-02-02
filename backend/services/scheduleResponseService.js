@@ -21,13 +21,42 @@ const scheduleResponseService = {
     // 全員が回答したかチェック
     const isComplete = await scheduleResponseService.checkAllResponded(schedule_id);
 
-    // 全員が回答したら、決まった日程を計算して保存
+    let autoDecided = false;
+    let commonSlots = [];
+
+    // 全員が回答したら、共通時間帯を計算
     if (isComplete) {
-      const finalSchedule = await scheduleResponseService.calculateFinalSchedule(schedule_id);
-      await Schedule.updateFinalSchedule(schedule_id, finalSchedule);
+      commonSlots = await scheduleResponseService.findCommonTimeSlots(schedule_id);
+
+      if (commonSlots.length === 1) {
+        // 共通時間帯が1つだけ → 自動決定
+        const finalSchedule = {
+          selectedSlot: commonSlots[0],
+          autoDecided: true,
+          decidedAt: new Date().toISOString(),
+          allResponses: await scheduleResponseService.calculateFinalSchedule(schedule_id)
+        };
+        await Schedule.updateFinalSchedule(schedule_id, finalSchedule);
+        await Schedule.updateStatus(schedule_id, 'auto_decided');
+        autoDecided = true;
+      } else if (commonSlots.length > 1) {
+        // 共通時間帯が複数 → 親に選択させる
+        await Schedule.updateCommonSlots(schedule_id, commonSlots);
+        await Schedule.updateStatus(schedule_id, 'pending_selection');
+      } else {
+        // 共通時間帯がない
+        const finalSchedule = await scheduleResponseService.calculateFinalSchedule(schedule_id);
+        await Schedule.updateFinalSchedule(schedule_id, finalSchedule);
+        await Schedule.updateStatus(schedule_id, 'no_common_time');
+      }
     }
 
-    return { success: true, isComplete };
+    return {
+      success: true,
+      isComplete,
+      autoDecided,
+      commonSlots
+    };
   },
 
   // 特定のスケジュールへの全回答を取得
@@ -85,8 +114,136 @@ const scheduleResponseService = {
         slots: slots
       };
     });
-    
+
     return allSelections;
+  },
+
+  // 全員の共通時間帯を見つける
+  findCommonTimeSlots: async (schedule_id) => {
+    const responses = await ScheduleResponse.findByScheduleId(schedule_id);
+
+    if (responses.length === 0) {
+      return [];
+    }
+
+    // 全員の選択した時間帯を取得
+    const allUserSlots = responses.map(response => {
+      const slots = typeof response.selected_time_slots === 'string'
+        ? JSON.parse(response.selected_time_slots)
+        : response.selected_time_slots;
+      return slots || [];
+    });
+
+    // 誰も時間を選択していない場合
+    if (allUserSlots.every(slots => slots.length === 0)) {
+      return [];
+    }
+
+    // 最初のユーザーの選択を基準にする
+    const baseSlots = allUserSlots[0];
+    const commonSlots = [];
+
+    // 各時間帯が他の全員にも含まれているかチェック
+    for (const slot of baseSlots) {
+      let isCommon = true;
+
+      // 他の全ユーザーの選択をチェック
+      for (let i = 1; i < allUserSlots.length; i++) {
+        const userSlots = allUserSlots[i];
+
+        // この時間帯が重なっているかチェック
+        const hasOverlap = userSlots.some(userSlot =>
+          scheduleResponseService.timeSlotsOverlap(slot, userSlot)
+        );
+
+        if (!hasOverlap) {
+          isCommon = false;
+          break;
+        }
+      }
+
+      if (isCommon) {
+        // 全員の重なる時間帯を計算
+        const overlappingSlot = scheduleResponseService.calculateOverlappingSlot(
+          slot,
+          allUserSlots
+        );
+
+        if (overlappingSlot) {
+          // 重複を避けるため、既存の共通時間帯と統合
+          const existingIndex = commonSlots.findIndex(cs =>
+            cs.date === overlappingSlot.date &&
+            cs.startTime === overlappingSlot.startTime &&
+            cs.endTime === overlappingSlot.endTime
+          );
+
+          if (existingIndex === -1) {
+            commonSlots.push(overlappingSlot);
+          }
+        }
+      }
+    }
+
+    return commonSlots;
+  },
+
+  // 2つの時間帯が重なっているかチェック
+  timeSlotsOverlap: (slot1, slot2) => {
+    if (slot1.date !== slot2.date) {
+      return false;
+    }
+
+    const start1 = scheduleResponseService.timeToMinutes(slot1.startTime);
+    const end1 = scheduleResponseService.timeToMinutes(slot1.endTime);
+    const start2 = scheduleResponseService.timeToMinutes(slot2.startTime);
+    const end2 = scheduleResponseService.timeToMinutes(slot2.endTime);
+
+    return start1 < end2 && start2 < end1;
+  },
+
+  // 重なっている時間帯を計算
+  calculateOverlappingSlot: (baseSlot, allUserSlots) => {
+    let maxStart = scheduleResponseService.timeToMinutes(baseSlot.startTime);
+    let minEnd = scheduleResponseService.timeToMinutes(baseSlot.endTime);
+
+    // 全ユーザーの時間帯から最も遅い開始時刻と最も早い終了時刻を取得
+    for (const userSlots of allUserSlots) {
+      for (const slot of userSlots) {
+        if (slot.date === baseSlot.date) {
+          const start = scheduleResponseService.timeToMinutes(slot.startTime);
+          const end = scheduleResponseService.timeToMinutes(slot.endTime);
+
+          if (start < minEnd && end > maxStart) {
+            maxStart = Math.max(maxStart, start);
+            minEnd = Math.min(minEnd, end);
+          }
+        }
+      }
+    }
+
+    // 重なる時間がない場合
+    if (maxStart >= minEnd) {
+      return null;
+    }
+
+    return {
+      date: baseSlot.date,
+      startTime: scheduleResponseService.minutesToTime(maxStart),
+      endTime: scheduleResponseService.minutesToTime(minEnd)
+    };
+  },
+
+  // 時間を分に変換
+  timeToMinutes: (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  },
+
+  // 分を時間に変換
+  minutesToTime: (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   }
 };
 

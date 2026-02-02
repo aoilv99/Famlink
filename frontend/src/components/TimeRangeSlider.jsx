@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './TimeRangeSlider.css';
 
 /**
@@ -26,65 +26,102 @@ const TimeRangeSlider = ({
 
   const minTime = timeToMinutes(originalStart);
   const maxTime = timeToMinutes(originalEnd);
+  const step = 30; // 30分刻み
 
-  const [startMinutes, setStartMinutes] = useState(minTime);
-  const [endMinutes, setEndMinutes] = useState(maxTime);
+  const [timeRange, setTimeRange] = useState([minTime, maxTime]);
+  const [dragging, setDragging] = useState(null);
+  const sliderRef = useRef(null);
 
-  const handleStartChange = (e) => {
-    const value = parseInt(e.target.value);
-    // 終了時間より前に設定
-    if (value < endMinutes) {
-      setStartMinutes(value);
-      // 親コンポーネントに変更を通知
-      onRangeChange({
-        startTime: minutesToTime(value),
-        endTime: minutesToTime(endMinutes)
-      });
-    }
+  const getPositionFromValue = (value) => {
+    return ((value - minTime) / (maxTime - minTime)) * 100;
   };
 
-  const handleEndChange = (e) => {
-    const value = parseInt(e.target.value);
-    // 開始時間より後に設定
-    if (value > startMinutes) {
-      setEndMinutes(value);
-      // 親コンポーネントに変更を通知
-      onRangeChange({
-        startTime: minutesToTime(startMinutes),
-        endTime: minutesToTime(value)
-      });
-    }
+  const getValueFromPosition = (clientX) => {
+    const rect = sliderRef.current.getBoundingClientRect();
+    const percent = (clientX - rect.left) / rect.width;
+    const value = minTime + percent * (maxTime - minTime);
+    // 30分刻みに丸める
+    const rounded = Math.round(value / step) * step;
+    return Math.max(minTime, Math.min(maxTime, rounded));
   };
+
+  const handleMouseDown = (e, handle) => {
+    if (disabled) return;
+    e.preventDefault();
+    setDragging(handle);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!dragging || disabled) return;
+
+    const newValue = getValueFromPosition(e.clientX);
+    let newRange = [...timeRange];
+
+    if (dragging === 'start') {
+      if (newValue < timeRange[1]) {
+        newRange[0] = newValue;
+      }
+    } else if (dragging === 'end') {
+      if (newValue > timeRange[0]) {
+        newRange[1] = newValue;
+      }
+    }
+
+    setTimeRange(newRange);
+    onRangeChange({
+      startTime: minutesToTime(newRange[0]),
+      endTime: minutesToTime(newRange[1])
+    });
+  };
+
+  const handleMouseUp = () => {
+    setDragging(null);
+  };
+
+  React.useEffect(() => {
+    if (dragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [dragging, timeRange]);
+
+  const startPos = getPositionFromValue(timeRange[0]);
+  const endPos = getPositionFromValue(timeRange[1]);
 
   return (
     <div className="time-range-slider">
       <div className="time-display">
-        <span className="time-label">🕐 開始:</span>
-        <span className="time-value">{minutesToTime(startMinutes)}</span>
-        <span className="time-label">終了:</span>
-        <span className="time-value">{minutesToTime(endMinutes)}</span>
+        <span className="time-label">🕐</span>
+        <span className="time-value">{minutesToTime(timeRange[0])}</span>
+        <span className="time-separator">〜</span>
+        <span className="time-value">{minutesToTime(timeRange[1])}</span>
       </div>
 
-      <div className="slider-container">
-        <input
-          type="range"
-          min={minTime}
-          max={maxTime}
-          step={30} // 30分刻み
-          value={startMinutes}
-          onChange={handleStartChange}
-          disabled={disabled}
-          className="time-slider start-slider"
+      <div
+        ref={sliderRef}
+        className={`slider-container ${disabled ? 'disabled' : ''}`}
+      >
+        <div className="slider-track-bg" />
+        <div
+          className="slider-track-active"
+          style={{
+            left: `${startPos}%`,
+            width: `${endPos - startPos}%`
+          }}
         />
-        <input
-          type="range"
-          min={minTime}
-          max={maxTime}
-          step={30} // 30分刻み
-          value={endMinutes}
-          onChange={handleEndChange}
-          disabled={disabled}
-          className="time-slider end-slider"
+        <div
+          className="slider-handle start-handle"
+          style={{ left: `${startPos}%` }}
+          onMouseDown={(e) => handleMouseDown(e, 'start')}
+        />
+        <div
+          className="slider-handle end-handle"
+          style={{ left: `${endPos}%` }}
+          onMouseDown={(e) => handleMouseDown(e, 'end')}
         />
       </div>
 
