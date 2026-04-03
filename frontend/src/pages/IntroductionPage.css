@@ -1,0 +1,466 @@
+/* ========================================
+   紹介ページ全体のコンテナ
+   ======================================== */
+
+.intro-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ========================================
+   ヘッダーセクション
+   ======================================== */
+
+.intro-header {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 24px 20px 28px;
+  border-bottom: 1px solid #f0e0e4;
+}
+
+.intro-header-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ロゴ（アイコン画像 + テキスト）エリア */
+.intro-logo-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ロゴアイコン画像 */
+.intro-logo-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* "FamLink" テキストロゴ */
+.intro-logo-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #a52a44;
+  letter-spacing: 0.5px;
+}
+
+/* タグバッジエリア */
+.intro-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* タグバッジ共通スタイル */
+.intro-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* 個人制作タグ */
+.intro-tag--personal {
+  background-color: #fce8ed;
+  color: #a52a44;
+  border: 1px solid #e8a5b5;
+}
+
+/* Webアプリタグ */
+.intro-tag--web {
+  background-color: #e8f4fd;
+  color: #1a6fa8;
+  border: 1px solid #9dcce8;
+}
+
+/* モバイルタグ */
+.intro-tag--mobile {
+  background-color: #edf7ee;
+  color: #2e7d32;
+  border: 1px solid #9ecfa0;
+}
+
+/* キャッチコピーテキスト */
+.intro-catchcopy {
+  font-size: 13px;
+  color: #666666;
+  line-height: 1.8;
+  margin: 0;
+}
+
+
+/* ========================================
+   コンセプトセクション（白背景・引用枠）
+   ======================================== */
+
+.intro-concept {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 28px 20px;
+}
+
+.intro-concept-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  border: 1.5px solid #d8849a;
+  border-radius: 4px;
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 「私が目指す家族の在り方は」テキスト */
+.intro-concept-label {
+  font-size: 12px;
+  color: #888888;
+  margin: 0;
+}
+
+/* 「「食卓を囲んで〜」」引用テキスト */
+.intro-concept-quote {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.5;
+  border: none;
+  padding: 0;
+}
+
+/* 「ができる関係」テキスト */
+.intro-concept-suffix {
+  font-size: 12px;
+  color: #888888;
+  margin: 0;
+  text-align: right;
+}
+
+
+/* ========================================
+   機能紹介セクション（赤背景）
+   ======================================== */
+
+.intro-features {
+  width: 100%;
+  background-color: #a52a44;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 機能1件分のブロック */
+.intro-feature {
+  width: 100%;
+  padding: 32px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* 機能①：画像が左、テキストが右 */
+.intro-feature--left {
+  flex-direction: row;
+}
+
+/* 機能②：テキストが左、画像が右 */
+.intro-feature--right {
+  flex-direction: row;
+}
+
+/* スマートフォン画像エリア */
+.intro-feature-phone {
+  flex-shrink: 0;
+  width: 120px;
+}
+
+/* スクリーンショット実画像 ※差し替え時に使用 */
+.intro-phone-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* スクリーンショットのプレースホルダー（画像差し替え前の仮表示） */
+.intro-phone-placeholder {
+  width: 100%;
+  height: 200px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+/* 機能テキストエリア */
+.intro-feature-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 「機能①」「機能②」ラベル */
+.intro-feature-number {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 機能タイトル */
+.intro-feature-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* 機能説明文 */
+.intro-feature-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.8;
+}
+
+/* 機能①と機能②の間の区切り線 */
+.intro-feature--left {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+/* ========================================
+   技術スタックセクション
+   ======================================== */
+
+.intro-tech {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 32px 20px 40px;
+}
+
+.intro-tech-inner {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* セクションタイトル「技術スタック」 */
+.intro-tech-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* 技術ロゴ横並びエリア */
+.intro-tech-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 技術ロゴ1つ分のアイテム */
+.intro-tech-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 実際のロゴ画像 ※差し替え時に使用 */
+.intro-tech-logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* 技術ロゴのプレースホルダー（画像差し替え前の仮表示） */
+.intro-tech-logo-placeholder {
+  width: 52px;
+  height: 36px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  border: 1.5px dashed #cccccc;
+}
+
+
+/* ========================================
+   レスポンシブ対応：タブレット（768px以上）
+   ======================================== */
+
+@media (min-width: 768px) {
+  /* ヘッダー */
+  .intro-header {
+    padding: 32px 40px 36px;
+  }
+
+  /* ロゴアイコン */
+  .intro-logo-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* ロゴテキスト */
+  .intro-logo-text {
+    font-size: 28px;
+  }
+
+  /* タグ */
+  .intro-tag {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+
+  /* キャッチコピー */
+  .intro-catchcopy {
+    font-size: 15px;
+  }
+
+  /* コンセプト */
+  .intro-concept {
+    padding: 40px 40px;
+  }
+
+  .intro-concept-inner {
+    padding: 28px 28px 22px;
+  }
+
+  .intro-concept-label {
+    font-size: 13px;
+  }
+
+  .intro-concept-quote {
+    font-size: 26px;
+  }
+
+  .intro-concept-suffix {
+    font-size: 13px;
+  }
+
+  /* 機能セクション */
+  .intro-feature {
+    padding: 48px 40px;
+    gap: 32px;
+  }
+
+  .intro-feature-phone {
+    width: 160px;
+  }
+
+  .intro-phone-placeholder {
+    height: 280px;
+  }
+
+  .intro-feature-title {
+    font-size: 28px;
+  }
+
+  .intro-feature-desc {
+    font-size: 14px;
+  }
+
+  /* 技術スタック */
+  .intro-tech {
+    padding: 40px 40px 56px;
+  }
+
+  .intro-tech-title {
+    font-size: 18px;
+  }
+
+  .intro-tech-logo-placeholder {
+    width: 64px;
+    height: 44px;
+  }
+}
+
+
+/* ========================================
+   レスポンシブ対応：PC（1280px以上）
+   ======================================== */
+
+@media (min-width: 1280px) {
+  /* ヘッダー */
+  .intro-header {
+    padding: 40px 60px 44px;
+  }
+
+  /* ロゴ */
+  .intro-logo-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .intro-logo-text {
+    font-size: 32px;
+  }
+
+  /* キャッチコピー */
+  .intro-catchcopy {
+    font-size: 16px;
+  }
+
+  /* コンセプト */
+  .intro-concept {
+    padding: 48px 60px;
+  }
+
+  .intro-concept-quote {
+    font-size: 30px;
+  }
+
+  /* 機能セクション */
+  .intro-feature {
+    padding: 56px 60px;
+    gap: 48px;
+  }
+
+  .intro-feature-phone {
+    width: 200px;
+  }
+
+  .intro-phone-placeholder {
+    height: 340px;
+  }
+
+  .intro-feature-title {
+    font-size: 34px;
+  }
+
+  .intro-feature-desc {
+    font-size: 15px;
+  }
+
+  /* 技術スタック */
+  .intro-tech {
+    padding: 48px 60px 72px;
+  }
+
+  .intro-tech-logos {
+    gap: 24px;
+  }
+
+  .intro-tech-logo-placeholder {
+    width: 80px;
+    height: 52px;
+  }
+}
