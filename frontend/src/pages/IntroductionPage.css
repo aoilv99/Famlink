@@ -1,364 +1,491 @@
 /* ========================================
-   紹介ページ全体のコンテナ
+   紹介ページ全体のスタイル
    ======================================== */
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .intro-container {
-  width: 100%;
+  width: 100vw;
   min-height: 100vh;
+  margin-left: calc(-50vw + 50%);
   background-color: #ffffff;
   font-family: inherit;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* 親要素の幅制限を強制解除 */
+#root:has(.intro-container),
+body:has(.intro-container) {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow-x: hidden;
 }
 
 
 /* ========================================
-   ヘッダーセクション
+   ① ヘッダーセクション
+   PCで1画面分（100vh）を使う縦伸び版
+   左：ロゴ大＋FamLinkテキスト中央寄せ
+   右：タグバッジ＋キャッチコピー
    ======================================== */
 
 .intro-header {
   width: 100%;
+  min-height: 100vh;          /* PCで1画面分 */
   background-color: #ffffff;
-  padding: 24px 20px 28px;
   border-bottom: 1px solid #f0e0e4;
+  display: flex;
+  align-items: center;        /* 縦中央揃え */
+  padding: 60px;
 }
 
 .intro-header-inner {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: row;        /* 左右2カラム */
+  align-items: center;
+  gap: 60px;
+}
+
+/* ---- 左カラム：ロゴアイコン＋FamLinkテキスト ---- */
+
+.intro-logo-col {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-/* ロゴ（アイコン画像 + テキスト）エリア */
-.intro-logo-area {
-  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+  flex: 1;
 }
 
-/* ロゴアイコン画像 */
 .intro-logo-icon {
-  width: 48px;
-  height: 48px;
+  width: 160px;
+  height: 160px;
   object-fit: contain;
 }
 
-/* "FamLink" テキストロゴ */
 .intro-logo-text {
-  font-size: 22px;
+  font-size: 42px;
   font-weight: 700;
-  color: #a52a44;
-  letter-spacing: 0.5px;
+  color: #1a1a1a;
+  letter-spacing: 1px;
+  line-height: 1.1;
 }
 
-/* タグバッジエリア */
+/* ---- 右カラム：タグバッジ＋キャッチコピー ---- */
+
+.intro-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1.2;
+}
+
 .intro-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
-/* タグバッジ共通スタイル */
 .intro-tag {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 3px 10px;
+  padding: 4px 14px;
   border-radius: 20px;
   letter-spacing: 0.3px;
+  line-height: 1.6;
 }
 
-/* 個人制作タグ */
 .intro-tag--personal {
   background-color: #fce8ed;
   color: #a52a44;
   border: 1px solid #e8a5b5;
 }
 
-/* Webアプリタグ */
 .intro-tag--web {
   background-color: #e8f4fd;
   color: #1a6fa8;
   border: 1px solid #9dcce8;
 }
 
-/* モバイルタグ */
 .intro-tag--mobile {
   background-color: #edf7ee;
   color: #2e7d32;
   border: 1px solid #9ecfa0;
 }
 
-/* キャッチコピーテキスト */
 .intro-catchcopy {
-  font-size: 13px;
-  color: #666666;
-  line-height: 1.8;
+  font-size: 20px;
+  color: #444444;
+  line-height: 1.9;
   margin: 0;
 }
 
 
 /* ========================================
-   コンセプトセクション（白背景・引用枠）
+   ② コンセプトセクション
+   PCで1画面分（100vh）を使う
+   中央に大きく引用を配置＋装飾
    ======================================== */
 
 .intro-concept {
   width: 100%;
-  background-color: #ffffff;
-  padding: 28px 20px;
+  min-height: 100vh;           /* PCで1画面分 */
+  background-color: #fdf5f7;   /* 淡いピンクの背景で画面が映える */
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 背景装飾：左上の丸 */
+.intro-concept::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: -120px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(165, 42, 68, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* 背景装飾：右下の丸 */
+.intro-concept::after {
+  content: '';
+  position: absolute;
+  bottom: -100px;
+  right: -100px;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(165, 42, 68, 0.06) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .intro-concept-inner {
-  max-width: 600px;
-  margin: 0 auto;
-  border: 1.5px solid #d8849a;
-  border-radius: 4px;
-  padding: 20px 20px 16px;
+  width: 100%;
+  max-width: 860px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 上部の装飾ライン */
+.intro-concept-deco-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.intro-concept-deco-top::before,
+.intro-concept-deco-top::after {
+  content: '';
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d8849a);
+}
+
+.intro-concept-deco-top::after {
+  background: linear-gradient(to left, transparent, #d8849a);
+}
+
+.intro-concept-deco-diamond {
+  width: 8px;
+  height: 8px;
+  background-color: #a52a44;
+  transform: rotate(45deg);
 }
 
 /* 「私が目指す家族の在り方は」テキスト */
 .intro-concept-label {
-  font-size: 12px;
-  color: #888888;
+  font-size: 15px;
+  color: #999999;
   margin: 0;
+  letter-spacing: 1px;
+  text-align: center;
 }
 
-/* 「「食卓を囲んで〜」」引用テキスト */
+/* 引用枠 */
+.intro-concept-quote-box {
+  width: 100%;
+  border: 2px solid #d8849a;
+  border-radius: 8px;
+  padding: 48px 56px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 32px rgba(165, 42, 68, 0.07);
+  position: relative;
+}
+
+/* 引用符の装飾 */
+.intro-concept-quote-box::before {
+  content: '"';
+  position: absolute;
+  top: -28px;
+  left: 40px;
+  font-size: 80px;
+  color: #e8a5b5;
+  font-family: Georgia, serif;
+  line-height: 1;
+}
+
+/* 「「食卓を囲んで他愛もない会話」」引用テキスト */
 .intro-concept-quote {
-  font-size: 20px;
+  font-size: 32px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
   border: none;
   padding: 0;
+  text-align: center;
 }
 
 /* 「ができる関係」テキスト */
 .intro-concept-suffix {
-  font-size: 12px;
-  color: #888888;
+  font-size: 14px;
+  color: #999999;
   margin: 0;
   text-align: right;
+  letter-spacing: 1px;
+}
+
+/* 下部の装飾ライン（上と同じ構造） */
+.intro-concept-deco-bottom {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+.intro-concept-deco-bottom::before,
+.intro-concept-deco-bottom::after {
+  content: '';
+  flex: 1;
+  max-width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #d8849a);
+}
+
+.intro-concept-deco-bottom::after {
+  background: linear-gradient(to left, transparent, #d8849a);
 }
 
 
 /* ========================================
-   機能紹介セクション（赤背景）
+   ③ 機能紹介セクション（赤背景）
+   参考画像3枚目に合わせた赤・縦積みレイアウト
    ======================================== */
 
 .intro-features {
   width: 100%;
-  background-color: #a52a44;
+  background-color: #c0392b;  /* 参考画像3枚目の赤 */
   padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-/* 機能1件分のブロック */
 .intro-feature {
   width: 100%;
-  padding: 32px 20px;
+  padding: 80px 60px;
   display: flex;
   align-items: center;
-  gap: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  box-sizing: border-box;
+  gap: 60px;
 }
 
-/* 機能①：画像が左、テキストが右 */
 .intro-feature--left {
   flex-direction: row;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-/* 機能②：テキストが左、画像が右 */
 .intro-feature--right {
   flex-direction: row;
 }
 
-/* スマートフォン画像エリア */
 .intro-feature-phone {
   flex-shrink: 0;
-  width: 120px;
+  width: 220px;
 }
 
-/* スクリーンショット実画像 ※差し替え時に使用 */
 .intro-phone-image {
   width: 100%;
   height: auto;
   object-fit: contain;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
 }
 
-/* スクリーンショットのプレースホルダー（画像差し替え前の仮表示） */
-.intro-phone-placeholder {
-  width: 100%;
-  height: 200px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-}
-
-/* 機能テキストエリア */
 .intro-feature-text {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
 }
 
-/* 「機能①」「機能②」ラベル */
 .intro-feature-number {
-  font-size: 12px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
   margin: 0;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
-/* 機能タイトル */
 .intro-feature-title {
-  font-size: 22px;
+  font-size: 40px;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
   line-height: 1.3;
+  letter-spacing: 1px;
 }
 
-/* 機能説明文 */
 .intro-feature-desc {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  line-height: 1.8;
-}
-
-/* 機能①と機能②の間の区切り線 */
-.intro-feature--left {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  line-height: 2;
 }
 
 
 /* ========================================
-   技術スタックセクション
+   ④ 技術スタックセクション
    ======================================== */
 
 .intro-tech {
   width: 100%;
   background-color: #ffffff;
-  padding: 32px 20px 40px;
+  padding: 56px 60px 72px;
 }
 
 .intro-tech-inner {
-  max-width: 600px;
-  margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
-/* セクションタイトル「技術スタック」 */
 .intro-tech-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
 }
 
-/* 技術ロゴ横並びエリア */
 .intro-tech-logos {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 28px;
 }
 
-/* 技術ロゴ1つ分のアイテム */
 .intro-tech-item {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 実際のロゴ画像 ※差し替え時に使用 */
 .intro-tech-logo {
-  height: 36px;
+  height: 44px;
   width: auto;
   object-fit: contain;
 }
 
-/* 技術ロゴのプレースホルダー（画像差し替え前の仮表示） */
-.intro-tech-logo-placeholder {
-  width: 52px;
-  height: 36px;
-  background-color: #f0f0f0;
-  border-radius: 4px;
-  border: 1.5px dashed #cccccc;
+
+/* ========================================
+   アニメーション
+   ======================================== */
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.intro-header  { animation: fadeInDown 0.6s ease-out backwards; }
+.intro-concept { animation: fadeInUp 0.6s ease-out 0.1s backwards; }
+.intro-feature--left  { animation: fadeInUp 0.6s ease-out 0.2s backwards; }
+.intro-feature--right { animation: fadeInUp 0.6s ease-out 0.3s backwards; }
+.intro-tech    { animation: fadeInUp 0.6s ease-out 0.4s backwards; }
 
 
 /* ========================================
-   レスポンシブ対応：タブレット（768px以上）
+   レスポンシブ（タブレット：768px以下）
    ======================================== */
 
-@media (min-width: 768px) {
-  /* ヘッダー */
+@media (max-width: 768px) {
+  /* ヘッダー：左右→上下カラムに変更 */
   .intro-header {
-    padding: 32px 40px 36px;
+    min-height: 70vh;
+    padding: 48px 32px;
   }
 
-  /* ロゴアイコン */
+  .intro-header-inner {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+
+  .intro-logo-col {
+    gap: 12px;
+  }
+
   .intro-logo-icon {
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 110px;
   }
 
-  /* ロゴテキスト */
   .intro-logo-text {
-    font-size: 28px;
+    font-size: 32px;
   }
 
-  /* タグ */
-  .intro-tag {
-    font-size: 12px;
-    padding: 4px 12px;
+  .intro-text-col {
+    align-items: center;
   }
 
-  /* キャッチコピー */
   .intro-catchcopy {
-    font-size: 15px;
+    font-size: 16px;
+    text-align: center;
   }
 
   /* コンセプト */
   .intro-concept {
-    padding: 40px 40px;
-  }
-
-  .intro-concept-inner {
-    padding: 28px 28px 22px;
-  }
-
-  .intro-concept-label {
-    font-size: 13px;
+    min-height: 60vh;
+    padding: 48px 32px;
   }
 
   .intro-concept-quote {
-    font-size: 26px;
+    font-size: 24px;
   }
 
-  .intro-concept-suffix {
-    font-size: 13px;
+  .intro-concept-quote-box {
+    padding: 36px 36px;
   }
 
-  /* 機能セクション */
+  /* 機能 */
   .intro-feature {
-    padding: 48px 40px;
+    padding: 56px 32px;
     gap: 32px;
   }
 
@@ -366,101 +493,144 @@
     width: 160px;
   }
 
-  .intro-phone-placeholder {
-    height: 280px;
-  }
-
   .intro-feature-title {
-    font-size: 28px;
+    font-size: 30px;
   }
 
   .intro-feature-desc {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   /* 技術スタック */
   .intro-tech {
-    padding: 40px 40px 56px;
+    padding: 40px 32px 52px;
   }
 
-  .intro-tech-title {
-    font-size: 18px;
-  }
-
-  .intro-tech-logo-placeholder {
-    width: 64px;
-    height: 44px;
+  .intro-tech-logo {
+    height: 36px;
   }
 }
 
 
 /* ========================================
-   レスポンシブ対応：PC（1280px以上）
+   レスポンシブ（スマートフォン：480px以下）
    ======================================== */
 
-@media (min-width: 1280px) {
+@media (max-width: 480px) {
   /* ヘッダー */
   .intro-header {
-    padding: 40px 60px 44px;
+    min-height: 60vh;
+    padding: 40px 20px;
   }
 
-  /* ロゴ */
+  .intro-header-inner {
+    gap: 24px;
+  }
+
   .intro-logo-icon {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
   }
 
   .intro-logo-text {
-    font-size: 32px;
+    font-size: 26px;
   }
 
-  /* キャッチコピー */
+  .intro-tag {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
   .intro-catchcopy {
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 1.8;
   }
 
   /* コンセプト */
   .intro-concept {
-    padding: 48px 60px;
+    min-height: 55vh;
+    padding: 40px 20px;
+  }
+
+  .intro-concept::before {
+    width: 200px;
+    height: 200px;
+    top: -60px;
+    left: -60px;
+  }
+
+  .intro-concept::after {
+    width: 180px;
+    height: 180px;
+  }
+
+  .intro-concept-inner {
+    gap: 20px;
+  }
+
+  .intro-concept-label {
+    font-size: 12px;
+  }
+
+  .intro-concept-quote-box {
+    padding: 28px 24px;
+  }
+
+  .intro-concept-quote-box::before {
+    font-size: 56px;
+    top: -20px;
+    left: 24px;
   }
 
   .intro-concept-quote {
-    font-size: 30px;
+    font-size: 18px;
   }
 
-  /* 機能セクション */
+  .intro-concept-suffix {
+    font-size: 12px;
+  }
+
+  /* 機能 */
   .intro-feature {
-    padding: 56px 60px;
-    gap: 48px;
+    padding: 40px 20px;
+    gap: 20px;
+    flex-direction: column !important; /* スマホでは縦積みに */
+    align-items: flex-start;
   }
 
   .intro-feature-phone {
-    width: 200px;
+    width: 100%;
+    max-width: 200px;
+    align-self: center;
   }
 
-  .intro-phone-placeholder {
-    height: 340px;
+  .intro-feature-number {
+    font-size: 12px;
   }
 
   .intro-feature-title {
-    font-size: 34px;
+    font-size: 24px;
   }
 
   .intro-feature-desc {
-    font-size: 15px;
+    font-size: 13px;
+    line-height: 1.8;
   }
 
   /* 技術スタック */
   .intro-tech {
-    padding: 48px 60px 72px;
+    padding: 32px 20px 48px;
+  }
+
+  .intro-tech-title {
+    font-size: 16px;
   }
 
   .intro-tech-logos {
-    gap: 24px;
+    gap: 18px;
   }
 
-  .intro-tech-logo-placeholder {
-    width: 80px;
-    height: 52px;
+  .intro-tech-logo {
+    height: 30px;
   }
 }

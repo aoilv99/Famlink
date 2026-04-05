@@ -19,7 +19,7 @@ import SchedulePage from "./pages/SchedulePage.jsx"; // 日程調整画面
 import ConfirmationPage from "./pages/ConfirmationPage.jsx"; // 確認画面
 import CompletePage from "./pages/CompletePage.jsx"; // 送信完了画面
 import LineCallbackPage from "./pages/LineCallbackPage.jsx"; // LINEログインコールバック画面
-
+import IntroductionPage from "./pages/IntroductionPage.jsx";
 // === プライベートルート（認証必須のルート） ===
 /**
  * 認証が必要なページを保護するコンポーネント
@@ -275,6 +275,9 @@ function AppContent() {
           </PrivateRoute>
         }
       />
+
+      <Route path="/introduction" element={<IntroductionPage />} />
+
 
       {/* LINEログインコールバック画面（認証不要） */}
       <Route
