@@ -314,3 +314,70 @@
     font-size: 18px;
   }
 }
+
+/* ========================================
+   QRスキャン関連
+   ======================================== */
+
+.qr-scan-button {
+  width: 100%;
+  height: 48px;
+  background-color: transparent;
+  color: #a52a44;
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px dashed #a52a44;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.qr-scan-button:hover {
+  background-color: #f5e6e8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(165, 42, 68, 0.2);
+}
+
+.qr-scan-button.scanning {
+  background-color: #a52a44;
+  color: #ffffff;
+  border-style: solid;
+}
+
+.qr-scan-button:focus {
+  outline: none;
+}
+
+.qr-reader-area {
+  display: none;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.qr-reader-area.active {
+  display: block;
+}
+
+/* html5-qrcodeが生成するボタンなどを非表示 */
+.qr-reader-area img,
+.qr-reader-area select {
+  display: none !important;
+}
+
+.qr-scan-error {
+  font-size: 13px;
+  color: #d32f2f;
+  text-align: center;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.qr-scanned-hint {
+  font-size: 13px;
+  color: #4caf50;
+  text-align: center;
+  margin: 0;
+  font-weight: 600;
+}
