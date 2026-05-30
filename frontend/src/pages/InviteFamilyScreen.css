@@ -344,3 +344,52 @@
     font-size: 18px;
   }
 }
+
+/* ========================================
+   QRコード関連
+   ======================================== */
+
+.qr-toggle-button {
+  width: 100%;
+  height: 48px;
+  background-color: transparent;
+  color: #a52a44;
+  font-size: 15px;
+  font-weight: 600;
+  border: 2px dashed #a52a44;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.qr-toggle-button:hover {
+  background-color: #f5e6e8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(165, 42, 68, 0.2);
+}
+
+.qr-toggle-button:focus {
+  outline: none;
+}
+
+.qr-code-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background-color: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.qr-canvas {
+  display: block;
+}
+
+.qr-hint {
+  font-size: 12px;
+  color: #757575;
+  margin: 0;
+}
